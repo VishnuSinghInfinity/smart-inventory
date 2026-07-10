@@ -1,7 +1,9 @@
+from email.mime import text
+
 from ultralytics import YOLO
 from collections import defaultdict
 from tools.tools import search_restock, scrape_url
-
+from agents.comparing import comparing_agent
 
 def run_tracking():
     model = YOLO("final_best.pt")
@@ -47,6 +49,20 @@ def extract_price(text: str) -> str:
     
     unique_prices = list(dict.fromkeys(prices))[:3]
     return ", ".join(unique_prices)
+def extract_delivery(text: str) -> str:
+    """Extract delivery date/timeframe from scraped page text."""
+    patterns = [
+        r'(?:FREE delivery|Delivery by|Get it by|Get by)\s+([A-Za-z]+,?\s*\d{0,2}\s*[A-Za-z]*)',
+        r'(?:FREE delivery|Delivery by|Get it by|Get by)\s+(Tomorrow|Today)',
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            return match.group(0)  
+    
+    return "Delivery info not found"
+
 if __name__ == "__main__":
     unique_objects = run_tracking()
     inventory = inventory_count(unique_objects)
@@ -57,15 +73,29 @@ if __name__ == "__main__":
     print(inventory)
 
 tool1_output = search_restock.invoke({"stock": inventory, "threshold": 70})
-
+result_for_agent = []
 if tool1_output:
     print("\n" + "="*50)
     print("RESTOCK PRICE COMPARISON")
     print("="*50)
     for item in tool1_output:
         scraped = scrape_url.invoke({"url": item["url"]})
+        print(f"\n--- RAW SCRAPED TEXT for {item['url']} ---")
+        print(scraped[:500])  # just first 500 chars to eyeball
+        print("--- END ---\n")
         price = extract_price(scraped)
+        delivery_date = extract_delivery(scraped)
         site = item["url"].split("/")[2]  # extracts domain e.g. www.flipkart.com
-        print(f"{item['product']} | {site} | {price} | {item['url']}")
+        result_for_agent.append({
+            "product": item["product"],
+            "site": site,
+            "price": price,
+            "delivery": delivery_date,
+            "url": item["url"]
+        })
+    output_from_agent = comparing_agent(result_for_agent)
+    print(output_from_agent)
 else:
-    print("No low-stock suppliers to scrape.")
+    print("No low-stock products found below the threshold for restock search.")
+
+    
