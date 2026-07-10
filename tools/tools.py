@@ -1,7 +1,7 @@
 from langchain.tools import tool
 import requests
 import os
-
+from playwright.sync_api import sync_playwright
 from tavily import TavilyClient
 from dotenv import load_dotenv
 from rich import print
@@ -19,7 +19,7 @@ def search_restock(stock: dict, threshold: int = 70) -> list[dict]:
     limited to trusted e-commerce domains.
     Returns a list of dicts with 'product', 'count', 'title', 'url'.
     """
-    trusted_domains = ["amazon.in", "flipkart.com", "snapdeal.com"]
+    trusted_domains = ["amazon.in", "flipkart.com", "snapdeal.com","blinkit.com", "indiamart.com", "tradeindia.com", "wholesalebox.in"]
     
     low_stock = {
         product: count
@@ -47,19 +47,40 @@ def search_restock(stock: dict, threshold: int = 70) -> list[dict]:
 
     return all_results
 
-
 @tool
 def scrape_url(url: str) -> str:
     """
-    Scrape the content of a webpage given its URL.
-    Return the text content in plain text, prioritizing product prices if present.
+    Visit a product page using a real browser and return
+    product information including price and delivery date.
     """
+
     try:
-        response = requests.get(url, timeout=8, headers={"User-Agent": "Mozilla/5.0"})
-        response.raise_for_status()
-        soup = BeautifulSoup(response.content, "html.parser")
-        for tag in soup(["script", "style", "nav", "footer"]):
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--disable-blink-features=AutomationControlled"]
+            )
+
+            page = browser.new_page(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+            )
+
+            page.goto(url, timeout=60000)
+
+            page.wait_for_load_state("networkidle")
+           
+            html = page.content()
+
+            browser.close()
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        for tag in soup(["script", "style", "noscript"]):
             tag.decompose()
-        return soup.get_text(separator=" ", strip=True)[:3000]
-    except requests.exceptions.RequestException as e:
-        return f"Error scraping the URL: {str(e)}"
+
+        text = soup.get_text(" ", strip=True)
+
+        return text
+
+    except Exception as e:
+        return f"Error scraping: {e}"
