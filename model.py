@@ -72,30 +72,30 @@ if __name__ == "__main__":
     print("=" * 40)
     print(inventory)
 
-tool1_output = search_restock.invoke({"stock": inventory, "threshold": 70})
-result_for_agent = []
-if tool1_output:
-    print("\n" + "="*50)
-    print("RESTOCK PRICE COMPARISON")
-    print("="*50)
-    for item in tool1_output:
-        scraped = scrape_url.invoke({"url": item["url"]})
-        print(f"\n--- RAW SCRAPED TEXT for {item['url']} ---")
-        print(scraped[:500])  # just first 500 chars to eyeball
-        print("--- END ---\n")
-        price = extract_price(scraped)
-        delivery_date = extract_delivery(scraped)
-        site = item["url"].split("/")[2]  # extracts domain e.g. www.flipkart.com
-        result_for_agent.append({
-            "product": item["product"],
-            "site": site,
-            "price": price,
-            "delivery": delivery_date,
-            "url": item["url"]
-        })
-    output_from_agent = comparing_agent(result_for_agent)
-    print(output_from_agent)
+    tool1_output = search_restock.invoke({"stock": inventory, "threshold": 70})
+    result_for_agent = []
+    if tool1_output:
+        print("\n" + "="*50)
+        print("RESTOCK PRICE COMPARISON")
+        print("="*50)
+        for item in tool1_output:
+            scraped = scrape_url.invoke({"url": item["url"]})
+            print(f"\n--- RAW SCRAPED TEXT for {item['url']} ---")
+            print(scraped[:500])  # just first 500 chars to eyeball
+            print("--- END ---\n")
+            price = extract_price(scraped)
+            delivery_date = extract_delivery(scraped)
+            site = item["url"].split("/")[2]  # extracts domain e.g. www.flipkart.com
+            result_for_agent.append({
+                "product": item["product"],
+                "site": site,
+                "price": price,
+                "delivery": delivery_date,
+                "url": item["url"]
+            })
+        output_from_agent = comparing_agent(result_for_agent)
+        print(output_from_agent)
 else:
     print("No low-stock products found below the threshold for restock search.")
 
-    
+        
