@@ -2,6 +2,6 @@
 _pycache_/
 runs/
 .env
-*.pt
+
 *.mp4
 *.pyc
