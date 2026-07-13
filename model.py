@@ -42,25 +42,33 @@ import re
 
 def extract_price(text: str) -> str:
     """Extract the most likely price from scraped page text."""
-    
-    prices = re.findall(r'₹\s?[\d,]+(?:\.\d{1,2})?', text)
+    if "contact seller for price" in text.lower():
+        return "Contact seller for price"
+ 
+    # ₹ symbol (with optional non-breaking space), plus common textual
+    # variants ("Rs.", "Rs", "INR") some sites use instead of the symbol.
+    patterns = [
+        r'₹\s?[\d,]+(?:\.\d{1,2})?',
+        r'(?:Rs\.?|INR)\s?[\d,]+(?:\.\d{1,2})?',
+    ]
+    prices = []
+    for pattern in patterns:
+        prices.extend(re.findall(pattern, text, re.IGNORECASE))
     if not prices:
         return "Price not found"
-    
     unique_prices = list(dict.fromkeys(prices))[:3]
     return ", ".join(unique_prices)
 def extract_delivery(text: str) -> str:
     """Extract delivery date/timeframe from scraped page text."""
     patterns = [
-        r'(?:FREE delivery|Delivery by|Get it by|Get by)\s+([A-Za-z]+,?\s*\d{0,2}\s*[A-Za-z]*)',
-        r'(?:FREE delivery|Delivery by|Get it by|Get by)\s+(Tomorrow|Today)',
+        r'(?:FREE delivery|Delivery by|Get it by|Get by|Arrives by|Estimated delivery:?)\s+'
+        r'([A-Za-z]+,?\s*\d{0,2}\s*[A-Za-z]*)',
+        r'(?:FREE delivery|Delivery by|Get it by|Get by|Arrives by)\s+(Tomorrow|Today)',
     ]
-    
     for pattern in patterns:
         match = re.search(pattern, text, re.IGNORECASE)
         if match:
-            return match.group(0)  
-    
+            return match.group(0)
     return "Delivery info not found"
 
 if __name__ == "__main__":
