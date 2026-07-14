@@ -21,7 +21,7 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 
 from theme import inject_global_css, processing_banner
-from sales import generate_sales_history, compute_metrics, apply_rules
+from sales import load_inventory_master, generate_sales_history, compute_metrics, apply_rules
 from chatbot import ask_shelfsense, build_context
 
 load_dotenv()
@@ -44,7 +44,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.caption("Using a demo sales data ")
+st.caption("Product master data (prices, expiry, category) comes from inventory.csv. "
+           "If a scan has been run on the Home page, only detected products are analyzed here; "
+           "otherwise every product in inventory.csv is shown with its baseline stock.")
 
 # --------------------------------------------------------------------------
 # Session state — thresholds are keyed so both the sliders AND the chatbot
@@ -77,9 +79,74 @@ low_stock_days = st.session_state.low_stock_days
 trend_up_pct = st.session_state.trend_up_pct
 
 # --------------------------------------------------------------------------
+# Inventory master data (inventory.csv) + live detection filtering
+# --------------------------------------------------------------------------
+try:
+    inventory_master = load_inventory_master()
+except (FileNotFoundError, ValueError) as e:
+    st.error(f"Couldn't load inventory.csv: {e}")
+    st.stop()
+
+live_inventory = st.session_state.get("inventory")  # set by the Home page's YOLO scan / JSON upload
+scan_has_run = live_inventory is not None
+
+if scan_has_run:
+    detected_products = [p for p in live_inventory if p != "grand_total"]
+    detected_in_master = [p for p in detected_products if p in inventory_master]
+    unmatched = [p for p in detected_products if p not in inventory_master]
+
+    if not detected_in_master:
+        detected_repr = ", ".join(repr(p) for p in detected_products) if detected_products else "(none)"
+        master_repr = ", ".join(repr(p) for p in inventory_master.keys())
+        st.markdown(
+            '<div class="empty-state">📷 A scan ran, but none of the detected classes match a product in '
+            'inventory.csv — nothing to analyze.</div>',
+            unsafe_allow_html=True,
+        )
+        st.markdown("**Detected class names (from this scan):**")
+        st.code(detected_repr, language="text")
+        st.markdown("**Product names currently in inventory.csv:**")
+        st.code(master_repr, language="text")
+        st.caption("Matching is exact-string, case- and whitespace-sensitive — repr() above will reveal "
+                   "any invisible leading/trailing spaces. Compare the two lists character-by-character.")
+        st.stop()
+
+    st.markdown(
+        f'<div class="proc-banner" style="animation:none;">'
+        f'<div class="proc-icon" style="animation:none;">📷</div>'
+        f'<div class="proc-body"><div class="proc-title">Showing {len(detected_in_master)} product(s) '
+        f'detected in your latest scan</div>'
+        f'<div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">'
+        f'Stock counts are live from that scan; prices, category, and expiry still come from inventory.csv.'
+        + (f' {len(unmatched)} detected class(es) had no match in inventory.csv and are skipped: '
+           f'{", ".join(unmatched)}.' if unmatched else '')
+        + '</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    product_filter = detected_in_master
+    live_counts = {p: live_inventory[p] for p in detected_in_master}
+else:
+    st.markdown(
+        '<div class="proc-banner" style="animation:none;"><div class="proc-icon" style="animation:none;">📋</div>'
+        '<div class="proc-body"><div class="proc-title">No scan run yet this session</div>'
+        '<div style="color:var(--muted); font-size:0.85rem; margin-top:4px;">'
+        'Showing all products from inventory.csv with baseline stock. Run detection on the Home page '
+        'to switch this to live, detected-only data.</div></div></div>',
+        unsafe_allow_html=True,
+    )
+    product_filter = None
+    live_counts = None
+
+with st.expander("📋 Product master data (inventory.csv)"):
+    st.dataframe(
+        pd.DataFrame.from_dict(inventory_master, orient="index").rename_axis("product_name").reset_index(),
+        use_container_width=True, hide_index=True,
+    )
+
+# --------------------------------------------------------------------------
 # Data + rules (always computed — cheap, no API calls)
 # --------------------------------------------------------------------------
-history = generate_sales_history()
+history = generate_sales_history(inventory_master, live_counts=live_counts, product_filter=product_filter)
 metrics = compute_metrics(history)
 triggers = apply_rules(metrics, near_expiry_days=near_expiry_days,
                         low_stock_days=low_stock_days, trend_up_pct=trend_up_pct)
@@ -252,9 +319,6 @@ if baseline_products:
 # --------------------------------------------------------------------------
 # Floating chatbot — "Ask ShelfSense"
 # --------------------------------------------------------------------------
-# ===============================
-# Floating Chat
-# ===============================
 
 chat = st.container(border=True)
 

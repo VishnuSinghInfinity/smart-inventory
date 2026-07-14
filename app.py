@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 from theme import inject_global_css, processing_banner
 from detection import run_tracking, inventory_count, get_video_frame_count
 from model import extract_price, extract_delivery
-from tools.tools import search_restock, scrape_url
+from tools.tools import search_restock, scrape_url, async_run_restock_pipeline
 from agents.comparing import comparing_agent
 
 load_dotenv()
@@ -277,61 +277,74 @@ if run_pipeline:
     st.session_state.final_rows = []
     st.session_state.raw_output = ""
 
-    # ---- Stage 1: SEARCH ----
-    st.session_state.stage = 1
+    # ---- Stages 1 & 2: SEARCH & VERIFY (Async Concurrent) ----
+    st.session_state.stage = 2
     render_stepper(st.session_state.stage)
 
-    with st.status("🔍 Searching trusted suppliers (Tavily)...", expanded=True) as status:
+    search_status_box = st.status("🔍 Searching trusted suppliers (Tavily)...", expanded=True)
+    with search_status_box:
         st.markdown(
             processing_banner("🛰️", "Scouting the internet for restock deals...",
                                ["Pinging trusted suppliers", "Sniffing out bulk deals",
                                 "Cross-checking marketplaces", "Filtering the noise out"]),
             unsafe_allow_html=True,
         )
-        try:
-            search_results = search_restock.invoke({"stock": inventory, "threshold": threshold})
-        except Exception as e:
-            status.update(label=f"Search failed: {e}", state="error")
-            st.stop()
-        if not search_results:
-            status.update(label="No supplier listings found.", state="error")
-            st.stop()
-        st.write(f"Found {len(search_results)} listing(s) across trusted domains.")
-        for r in search_results:
-            st.write(f"— **{r['product'].replace('_',' ')}**: {r['title']}")
-        status.update(label=f"✅ Search complete — {len(search_results)} listings found", state="complete")
 
-    # ---- Stage 2: VERIFY (scrape + extract, live per item) ----
-    st.session_state.stage = 2
-    render_stepper(st.session_state.stage)
+    scrape_container = st.container()
+    status_boxes = {}
 
-    result_for_agent = []
-    for item in search_results:
-        site = item["url"].split("/")[2] if "://" in item["url"] else item["url"]
-        with st.status(f"🌐 Verifying **{item['product'].replace('_',' ')}** @ {site}", expanded=False) as s:
-            st.markdown(
-                processing_banner("🕵️", f"Opening a real browser on {site}...",
-                                   ["Loading the product page", "Reading the price tag",
-                                    "Checking delivery estimate", "Double-checking the numbers"]),
-                unsafe_allow_html=True,
-            )
-            try:
-                scraped = scrape_url.invoke({"url": item["url"]})
-            except Exception as e:
-                s.update(label=f"Failed to scrape {site}: {e}", state="error")
-                continue
-            price = extract_price(scraped)
-            delivery = extract_delivery(scraped)
-            st.write(f"Price: `{price}`")
-            st.write(f"Delivery: `{delivery}`")
-            s.update(label=f"✅ {site} — {price}", state="complete")
-        result_for_agent.append({
-            "product": item["product"],
-            "site": site,
-            "price": price,
-            "delivery": delivery,
-            "url": item["url"],
-        })
+    async def progress_callback(event_type: str, data: dict):
+        if event_type == "search_complete":
+            product = data["product"]
+            results = data["results"]
+            search_status_box.write(f"Found {len(results)} listing(s) for **{product.replace('_',' ')}**:")
+            for r in results:
+                search_status_box.write(f"— {r['title']}")
+        
+        elif event_type == "scrape_start":
+            url = data["url"]
+            product = data["product"]
+            site = url.split("/")[2] if "://" in url else url
+            with scrape_container:
+                status_boxes[url] = st.status(f"🌐 Verifying **{product.replace('_',' ')}** @ {site}", expanded=False)
+                with status_boxes[url]:
+                    st.markdown(
+                        processing_banner("🕵️", f"Opening a real browser on {site}...",
+                                           ["Loading the product page", "Reading the price tag",
+                                            "Checking delivery estimate", "Double-checking the numbers"]),
+                        unsafe_allow_html=True,
+                    )
+        
+        elif event_type == "scrape_complete":
+            url = data["url"]
+            price = data["price"]
+            delivery = data["delivery"]
+            site = url.split("/")[2] if "://" in url else url
+            status_box = status_boxes.get(url)
+            if status_box:
+                status_box.empty()
+                status_box.write(f"Price: `{price}`")
+                status_box.write(f"Delivery: `{delivery}`")
+                status_box.update(label=f"✅ {site} — {price}", state="complete")
+
+    import asyncio
+
+    async def run_async_pipeline():
+        return await async_run_restock_pipeline(
+            stock=inventory,
+            threshold=threshold,
+            concurrency_limit=5,
+            timeout_ms=15000,
+            progress_callback=progress_callback
+        )
+
+    try:
+        search_results, verified_results = asyncio.run(run_async_pipeline())
+    except Exception as e:
+        search_status_box.update(label=f"Pipeline failed: {e}", state="error")
+        st.stop()
+
+    search_status_box.update(label=f"✅ Search complete — {len(search_results)} listings found", state="complete")
 
     # ---- Stage 3: DECIDE (comparing agent) ----
     st.session_state.stage = 3
@@ -345,7 +358,7 @@ if run_pipeline:
             unsafe_allow_html=True,
         )
         try:
-            output = comparing_agent(result_for_agent)
+            output = comparing_agent(verified_results)
         except Exception as e:
             status.update(label=f"Comparison agent failed: {e}", state="error")
             st.stop()
