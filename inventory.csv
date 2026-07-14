@@ -1,0 +1,13 @@
+product_name,category,unit,supplier,cost_price,selling_price,current_stock,manufacturing_date,expiry_date
+Corn falkes,Food & Beverages,box (475g),Kellogg's India,140,180,40,2026-06-24,2026-07-22
+Corn flakes,Food & Beverages,box (475g),Kellogg's India,140,180,90,2026-06-19,2027-01-10
+Dettol,Personal Care,bar (75g),Reckitt Benckiser,27,35,80,2026-05-30,2026-07-20
+Dove,Personal Care,bar (100g),Hindustan Unilever,45,60,65,2026-06-14,2026-12-11
+Dove soap,Personal Care,bar (100g),Hindustan Unilever,45,60,30,2026-06-09,2026-07-24
+Lays,Food & Beverages,packet (52g),PepsiCo India,14,20,55,2026-06-29,2026-10-12
+Maggi,Food & Beverages,packet (70g),Nestle India,10,14,120,2026-06-04,2026-10-17
+Mountain Dew,Food & Beverages,bottle (750ml),PepsiCo India,30,40,20,2026-07-04,2027-01-30
+Nescafe,Food & Beverages,jar (50g),Nestle India,110,140,60,2026-05-15,2027-04-10
+colgate,Personal Care,tube (100g),Colgate-Palmolive India,40,55,70,2026-05-15,2027-02-09
+lays,Food & Beverages,packet (52g),PepsiCo India,14,20,15,2026-07-06,2026-09-12
+nescafe,Food & Beverages,jar (50g),Nestle India,110,140,200,2026-04-15,2027-05-10
