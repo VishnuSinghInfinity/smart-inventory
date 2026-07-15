@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Sparkles } from 'lucide-react'
+import { Sparkles, Bot, TrendingUp, TrendingDown, CheckCircle2, Package } from 'lucide-react'
 import { api, type SalesMetricsResponse, type Recommendation } from '../lib/api'
 import { Card, CardTitle } from '../components/ui/Card'
 import { StatCard, LoadingState, Button, EmptyState } from '../components/ui'
@@ -27,7 +27,7 @@ export default function AISalesAssistant() {
       const res = await api.generateRecommendations(triggers)
       setRecommendations(res.recommendations)
       if (res.warning) setMsg({ type: 'info', text: res.warning })
-      else setMsg({ type: 'success', text: '✅ AI recommendations generated!' })
+      else setMsg({ type: 'success', text: 'AI recommendations generated successfully.' })
     } catch(e: unknown) {
       setMsg({ type: 'error', text: 'Error: ' + (e instanceof Error ? e.message : 'Unknown') })
     } finally {
@@ -40,7 +40,9 @@ export default function AISalesAssistant() {
   const triggers = data ? [...data.discount_triggers, ...data.restock_triggers] : []
   const displayed = recommendations ?? triggers.map(t => ({
     ...t,
-    headline: t.action === 'discount' ? `Discount ${t.product.replace(/_/g,' ')}` : `Restock ${t.product.replace(/_/g,' ')}`,
+    headline: t.action === 'discount'
+      ? `Discount ${t.product.replace(/_/g,' ')}`
+      : `Restock ${t.product.replace(/_/g,' ')}`,
     detail: t.action === 'discount'
       ? `Expires in ${t.expiry_days}d, selling ~${t.avg_daily_sales_7d}/day. ${t.suggested_value}`
       : `Only ${t.days_of_stock_left}d of stock left at ~${t.avg_daily_sales_7d}/day (${fmtPct(t.trend_pct)} vs last week). ${t.suggested_value}`
@@ -48,86 +50,113 @@ export default function AISalesAssistant() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading font-extrabold text-[24px] tracking-tight text-gray-900">🤖 AI Sales Assistant</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Rule-based triggers meet AI copy. Groq generates precise discount and restock messaging.
-        </p>
+      {/* Page header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">AI Sales Assistant</h1>
+          <p className="text-[13px] text-gray-500 mt-1">
+            Rule-based triggers meet AI copy. Groq generates precise discount and restock messaging.
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          size="sm"
+          loading={genLoading}
+          icon={<Sparkles size={13} />}
+          onClick={generate}
+        >
+          Generate AI Copy
+        </Button>
       </div>
 
-      {/* Stats */}
+      {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard icon={<span>📊</span>} label="Products Tracked" value={data ? Object.keys(data.metrics).length : '—'} color="green" />
-        <StatCard icon={<span>🏷️</span>} label="Discount Actions" value={data?.discount_triggers.length ?? '—'} color="orange" />
-        <StatCard icon={<span>📥</span>} label="Restock Actions" value={data?.restock_triggers.length ?? '—'} color="violet" />
-        <StatCard icon={<span>✅</span>} label="Healthy Products" value={data?.baseline_products.length ?? '—'} color="cyan" />
+        <StatCard icon={<Package size={16} />} label="Products Tracked" value={data ? Object.keys(data.metrics).length : '—'} color="green" />
+        <StatCard icon={<TrendingDown size={16} />} label="Discount Actions" value={data?.discount_triggers.length ?? '—'} color="orange" />
+        <StatCard icon={<TrendingUp size={16} />} label="Restock Actions" value={data?.restock_triggers.length ?? '—'} color="violet" />
+        <StatCard icon={<CheckCircle2 size={16} />} label="Healthy Products" value={data?.baseline_products.length ?? '—'} color="cyan" />
       </div>
 
       {msg && <Alert variant={msg.type}>{msg.text}</Alert>}
 
-      {/* Recommendation panel */}
+      {/* Recommendations */}
       <Card>
-        <div className="flex items-center justify-between mb-4">
-          <CardTitle icon={<span className="bg-violet-50">✨</span>} className="mb-0">
-            {recommendations ? 'AI-Generated' : 'Rule-Based'} Recommendations
+        <div className="flex items-center justify-between mb-1">
+          <CardTitle icon={<Bot size={14} />} className="mb-0">
+            {recommendations ? 'AI-Generated Recommendations' : 'Rule-Based Recommendations'}
           </CardTitle>
-          <Button variant="primary" size="sm" loading={genLoading} icon={<Sparkles size={14}/>} onClick={generate}>
-            ✨ Generate AI Copy
-          </Button>
         </div>
 
         {!recommendations && (
-          <Alert variant="info" icon="💡">
-            Showing rule-based summaries — click "Generate AI Copy" for Groq-powered recommendations.
+          <Alert variant="info">
+            Showing rule-based summaries. Click "Generate AI Copy" above for Groq-powered recommendations.
           </Alert>
         )}
 
         {displayed.length === 0 ? (
-          <EmptyState icon="✅" title="All Clear" sub="No actions needed. Every product is well stocked and not near expiry." />
+          <EmptyState
+            icon="✓"
+            title="All Clear"
+            sub="No actions needed. Every product is well stocked and not near expiry."
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
-            {displayed.map((item, i) => (
-              <div
-                key={i}
-                className={`relative border-l-4 rounded-2xl p-5 border border-gray-200 card-hover ${
-                  item.action === 'discount' ? 'border-l-amber-400' : 'border-l-violet-500'
-                }`}
-              >
-                {/* Action pill */}
-                <div className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 ${
-                  item.action === 'discount' ? 'bg-amber-50 text-amber-700' : 'bg-violet-50 text-violet-700'
-                }`}>
-                  {item.urgency === 'urgent' ? '🔥' : item.urgency === 'high' ? '⚠️' : '💡'}
-                  {item.action.toUpperCase()} · {item.urgency.toUpperCase()}
+            {displayed.map((item, i) => {
+              const isDiscount = item.action === 'discount'
+              const urgencyIcon = item.urgency === 'urgent' ? '🔴' : item.urgency === 'high' ? '🟡' : '🟢'
+              return (
+                <div
+                  key={i}
+                  className={`relative rounded-xl border p-5 transition-all duration-150 hover:-translate-y-0.5 ${
+                    isDiscount
+                      ? 'border-amber-200 bg-amber-50/30'
+                      : 'border-indigo-200 bg-indigo-50/30'
+                  }`}
+                >
+                  {/* Type + urgency row */}
+                  <div className="flex items-center justify-between mb-3">
+                    <Badge variant={isDiscount ? 'orange' : 'violet'}>
+                      {item.action}
+                    </Badge>
+                    <span className="text-[11px] text-gray-400 font-medium capitalize">
+                      {urgencyIcon} {item.urgency}
+                    </span>
+                  </div>
+
+                  {/* Headline */}
+                  <h3 className="font-semibold text-[14px] text-gray-900 mb-2 capitalize leading-snug">
+                    {item.headline}
+                  </h3>
+
+                  {/* Detail */}
+                  <p className="text-[12px] text-gray-500 leading-relaxed mb-3">{item.detail}</p>
+
+                  {/* Suggested value */}
+                  <div className={`inline-block font-mono-custom text-[11px] font-bold px-2.5 py-1 rounded-md mb-4 ${
+                    isDiscount
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-indigo-100 text-indigo-700'
+                  }`}>
+                    {item.suggested_value}
+                  </div>
+
+                  {/* Meta row */}
+                  <div className="flex items-center gap-3 text-[11px] text-gray-400 pt-3 border-t border-gray-100">
+                    <span className="font-mono-custom">Stock: <span className="font-semibold text-gray-600">{item.current_stock}</span></span>
+                    <span className="text-gray-200">·</span>
+                    <span className="font-mono-custom">{item.avg_daily_sales_7d}/day</span>
+                    <span className="text-gray-200">·</span>
+                    <span className={cn(
+                      'flex items-center gap-0.5 font-semibold',
+                      item.trend_pct >= 0 ? 'text-emerald-600' : 'text-red-500'
+                    )}>
+                      {item.trend_pct >= 0 ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                      {fmtPct(item.trend_pct)}
+                    </span>
+                  </div>
                 </div>
-
-                {/* Headline */}
-                <h3 className="font-heading font-bold text-[15px] text-gray-900 mb-2 capitalize">
-                  {item.headline}
-                </h3>
-
-                {/* Detail */}
-                <p className="text-[12px] text-gray-500 leading-relaxed mb-3">{item.detail}</p>
-
-                {/* Value */}
-                <div className={`inline-block font-mono-custom text-[12px] font-bold px-3 py-1.5 rounded-lg mb-3 ${
-                  item.action === 'discount' ? 'bg-amber-50 text-amber-700' : 'bg-violet-50 text-violet-700'
-                }`}>
-                  {item.suggested_value}
-                </div>
-
-                {/* Meta */}
-                <div className="text-[10px] font-mono-custom text-gray-400 flex flex-wrap gap-2">
-                  <span>Stock: {item.current_stock}</span>
-                  <span>·</span>
-                  <span>{item.avg_daily_sales_7d}/day</span>
-                  <span>·</span>
-                  <span className={item.trend_pct >= 0 ? 'text-emerald-600' : 'text-red-500'}>
-                    {fmtPct(item.trend_pct)} trend
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </Card>
@@ -135,13 +164,13 @@ export default function AISalesAssistant() {
       {/* Business as Usual */}
       {data && data.baseline_products.length > 0 && (
         <Card>
-          <CardTitle icon={<span className="bg-green-50">✅</span>}>Business As Usual</CardTitle>
-          <div className="space-y-2">
+          <CardTitle icon={<CheckCircle2 size={14} />}>Healthy Products</CardTitle>
+          <div className="space-y-1.5">
             {data.baseline_products.map(p => {
               const m = data.metrics[p]
               return (
-                <div key={p} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <span className="font-semibold text-[13px] capitalize">{p}</span>
+                <div key={p} className="flex items-center justify-between py-2.5 px-4 rounded-lg bg-gray-50/60 border border-gray-100 hover:bg-gray-50 transition-colors">
+                  <span className="font-medium text-[13px] text-gray-700 capitalize">{p}</span>
                   <div className="flex gap-2">
                     <Badge variant="gray">{m.days_of_stock_left === 999 ? '∞' : m.days_of_stock_left}d stock</Badge>
                     <Badge variant="green">expires {m.days_until_expiry}d</Badge>
@@ -154,4 +183,8 @@ export default function AISalesAssistant() {
       )}
     </div>
   )
+}
+
+function cn(...classes: (string | boolean | undefined)[]) {
+  return classes.filter(Boolean).join(' ')
 }

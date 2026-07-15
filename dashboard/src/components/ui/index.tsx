@@ -3,30 +3,40 @@ import type { ReactNode } from 'react'
 
 // ── SPINNER ──────────────────────────────────────────────────────────────────
 export function Spinner({ size = 'md', className }: { size?: 'sm' | 'md' | 'lg'; className?: string }) {
-  const s = { sm: 'w-4 h-4 border-2', md: 'w-6 h-6 border-2', lg: 'w-10 h-10 border-[3px]' }[size]
+  const s = {
+    sm: 'w-3.5 h-3.5 border-[1.5px]',
+    md: 'w-5 h-5 border-2',
+    lg: 'w-8 h-8 border-[2.5px]'
+  }[size]
   return (
-    <div className={cn('rounded-full border-gray-200 border-t-violet-600 spinner', s, className)} />
+    <div className={cn('rounded-full border-gray-200 border-t-indigo-500 spinner', s, className)} />
   )
 }
 
 // ── LOADING STATE ─────────────────────────────────────────────────────────────
 export function LoadingState({ message = 'Loading...' }: { message?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 gap-4">
+    <div className="flex flex-col items-center justify-center py-20 gap-3">
       <Spinner size="lg" />
-      <p className="text-sm text-gray-500 font-medium">{message}</p>
+      <p className="text-[13px] text-gray-400 font-medium">{message}</p>
     </div>
   )
 }
 
 // ── EMPTY STATE ───────────────────────────────────────────────────────────────
-export function EmptyState({ icon, title, sub, children }: { icon: string; title: string; sub?: string; children?: ReactNode }) {
+export function EmptyState({
+  icon, title, sub, children
+}: {
+  icon: string; title: string; sub?: string; children?: ReactNode
+}) {
   return (
-    <div className="text-center py-14 px-6 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50">
-      <div className="text-5xl mb-3">{icon}</div>
-      <h3 className="font-heading font-bold text-gray-800 text-base mb-1">{title}</h3>
-      {sub && <p className="text-sm text-gray-400">{sub}</p>}
-      {children && <div className="mt-4">{children}</div>}
+    <div className="text-center py-16 px-6 border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+      <div className="w-12 h-12 bg-gray-100 rounded-2xl flex items-center justify-center text-2xl mx-auto mb-4">
+        {icon}
+      </div>
+      <h3 className="font-semibold text-gray-700 text-[14px] mb-1.5">{title}</h3>
+      {sub && <p className="text-[12px] text-gray-400 max-w-xs mx-auto leading-relaxed">{sub}</p>}
+      {children && <div className="mt-5">{children}</div>}
     </div>
   )
 }
@@ -35,11 +45,11 @@ export function EmptyState({ icon, title, sub, children }: { icon: string; title
 type BtnVariant = 'primary' | 'secondary' | 'green' | 'ghost' | 'danger'
 
 const btnVariants: Record<BtnVariant, string> = {
-  primary:   'bg-gradient-to-r from-violet-600 to-pink-500 text-white shadow-[0_4px_14px_rgba(124,58,237,0.35)] hover:shadow-[0_6px_20px_rgba(124,58,237,0.5)]',
-  green:     'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-[0_4px_14px_rgba(16,185,129,0.3)]',
-  secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200 border border-gray-200',
-  ghost:     'text-gray-600 hover:bg-gray-100',
-  danger:    'bg-red-50 text-red-600 hover:bg-red-100',
+  primary:   'bg-indigo-600 text-white hover:bg-indigo-500 shadow-[0_1px_2px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(99,102,241,0.3)] border border-indigo-700/20',
+  green:     'bg-emerald-600 text-white hover:bg-emerald-500 shadow-[0_1px_2px_rgba(0,0,0,0.1)] border border-emerald-700/20',
+  secondary: 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 shadow-[0_1px_2px_rgba(0,0,0,0.05)]',
+  ghost:     'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+  danger:    'bg-white text-red-600 hover:bg-red-50 border border-red-200',
 }
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -50,14 +60,21 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode
 }
 
-export function Button({ variant = 'primary', size = 'md', loading, icon, children, className, disabled, ...props }: ButtonProps) {
-  const sizeClass = { sm: 'px-3 py-1.5 text-xs', md: 'px-4 py-2 text-sm', lg: 'px-6 py-2.5 text-base' }[size]
+export function Button({
+  variant = 'primary', size = 'md', loading, icon, children, className, disabled, ...props
+}: ButtonProps) {
+  const sizeClass = {
+    sm: 'px-3 py-1.5 text-[12px] gap-1.5',
+    md: 'px-3.5 py-2 text-[13px] gap-2',
+    lg: 'px-5 py-2.5 text-[14px] gap-2'
+  }[size]
+
   return (
     <button
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center gap-2 font-semibold rounded-xl transition-all duration-150',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center font-semibold rounded-lg transition-all duration-150 cursor-pointer select-none',
+        'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
         btnVariants[variant],
         sizeClass,
         className
@@ -72,46 +89,55 @@ export function Button({ variant = 'primary', size = 'md', loading, icon, childr
 
 // ── STAT CARD ─────────────────────────────────────────────────────────────────
 type StatColor = 'green' | 'violet' | 'orange' | 'red' | 'cyan'
-const statTopBar: Record<StatColor, string> = {
-  green:  'from-emerald-400 to-green-500',
-  violet: 'from-violet-500 to-violet-400',
-  orange: 'from-amber-400 to-orange-400',
-  red:    'from-red-400 to-rose-400',
-  cyan:   'from-cyan-400 to-sky-400',
-}
+
 const statIconBg: Record<StatColor, string> = {
   green:  'bg-emerald-50 text-emerald-600',
-  violet: 'bg-violet-50 text-violet-600',
+  violet: 'bg-indigo-50 text-indigo-600',
   orange: 'bg-amber-50 text-amber-600',
   red:    'bg-red-50 text-red-500',
-  cyan:   'bg-cyan-50 text-cyan-600',
+  cyan:   'bg-sky-50 text-sky-600',
+}
+
+const statValueColor: Record<StatColor, string> = {
+  green:  'text-gray-900',
+  violet: 'text-gray-900',
+  orange: 'text-gray-900',
+  red:    'text-gray-900',
+  cyan:   'text-gray-900',
 }
 
 export function StatCard({
   icon, label, value, color, badge, badgeColor
 }: {
-  icon: ReactNode; label: string; value: string | number
-  color: StatColor; badge?: string; badgeColor?: 'up' | 'down' | 'neutral'
+  icon: ReactNode
+  label: string
+  value: string | number
+  color: StatColor
+  badge?: string
+  badgeColor?: 'up' | 'down' | 'neutral'
 }) {
   const badgeCls = {
-    up:      'bg-emerald-50 text-emerald-700',
-    down:    'bg-red-50 text-red-500',
+    up:      'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60',
+    down:    'bg-red-50 text-red-600 ring-1 ring-red-200/60',
     neutral: 'bg-gray-100 text-gray-500',
   }[badgeColor || 'neutral']
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm card-hover relative overflow-hidden">
-      <div className={cn('absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r', statTopBar[color])} />
-      <div className="flex items-center justify-between mb-3">
-        <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center text-xl', statIconBg[color])}>
+    <div className="bg-white border border-gray-200/80 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden group card-hover">
+      <div className="flex items-start justify-between mb-4">
+        <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center text-[16px] transition-colors', statIconBg[color])}>
           {icon}
         </div>
         {badge && (
-          <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full', badgeCls)}>{badge}</span>
+          <span className={cn('text-[10px] font-semibold px-2 py-0.5 rounded-md uppercase tracking-wide', badgeCls)}>
+            {badge}
+          </span>
         )}
       </div>
-      <div className="font-mono-custom text-[28px] font-bold text-gray-900 leading-none mb-1">{value}</div>
-      <div className="text-xs text-gray-500 font-medium">{label}</div>
+      <div className={cn('font-mono-custom text-[26px] font-bold leading-none mb-1.5 count-in', statValueColor[color])}>
+        {value}
+      </div>
+      <div className="text-[11px] text-gray-500 font-medium tracking-wide uppercase">{label}</div>
     </div>
   )
 }

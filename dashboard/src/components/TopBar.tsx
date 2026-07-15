@@ -1,14 +1,15 @@
-import { Menu } from 'lucide-react'
+import { Menu, Bell } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 
-const PAGE_TITLES: Record<string, string> = {
-  '/':           'Dashboard',
-  '/inventory':  'Inventory Monitoring',
-  '/sales':      'Sales Prediction',
-  '/competitor': 'Competitor Analysis',
-  '/assistant':  'AI Sales Assistant',
-  '/reports':    'Reports',
-  '/settings':   'Settings',
+const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
+  '/':           { title: 'Dashboard',            subtitle: 'Overview of your retail intelligence' },
+  '/inventory':  { title: 'Inventory Monitoring',  subtitle: 'YOLO + ByteTrack live detection' },
+  '/store':      { title: 'Store',                subtitle: 'Browse all products in the retail inventory' },
+  '/sales':      { title: 'Sales Prediction',       subtitle: '30-day forecasts and trend analysis' },
+  '/competitor': { title: 'Competitor Analysis',    subtitle: 'Autonomous restock pipeline' },
+  '/assistant':  { title: 'AI Sales Assistant',     subtitle: 'Groq-powered recommendations' },
+  '/reports':    { title: 'Reports',               subtitle: 'Executive inventory report' },
+  '/settings':   { title: 'Settings',              subtitle: 'Configure your workspace' },
 }
 
 interface TopBarProps {
@@ -17,28 +18,39 @@ interface TopBarProps {
 
 export function TopBar({ onToggle }: TopBarProps) {
   const { pathname } = useLocation()
-  const title = PAGE_TITLES[pathname] ?? 'ShelfSense'
-
-  const now = new Date().toLocaleString('en-IN', {
-    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false
-  })
+  const page = PAGE_TITLES[pathname] ?? { title: 'ShelfSense', subtitle: '' }
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center px-6 gap-4 flex-shrink-0 shadow-sm z-50">
+    <header className="h-14 bg-white border-b border-gray-200/80 flex items-center px-5 gap-4 flex-shrink-0 z-50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
       <button
         onClick={onToggle}
-        className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+        className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-100"
         aria-label="Toggle sidebar"
       >
-        <Menu size={18} />
+        <Menu size={15} />
       </button>
 
-      <h1 className="flex-1 font-heading font-bold text-[17px] text-gray-900">{title}</h1>
+      {/* Page title */}
+      <div className="flex-1 min-w-0">
+        <h1 className="font-semibold text-[14px] text-gray-900 leading-none tracking-tight truncate">
+          {page.title}
+        </h1>
+        <p className="text-[11px] text-gray-400 mt-0.5 hidden sm:block truncate">
+          {page.subtitle}
+        </p>
+      </div>
 
-      <div className="flex items-center gap-4">
-        <span className="font-mono-custom text-[12px] text-gray-400 hidden sm:block">{now}</span>
-        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center text-white text-[12px] font-bold shadow-[0_0_14px_rgba(124,58,237,0.4)] cursor-pointer select-none">
-          SS
+      <div className="flex items-center gap-2">
+        {/* Notification bell (presentational) */}
+        <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-all duration-100">
+          <Bell size={14} />
+        </button>
+
+        {/* Avatar */}
+        <div className="flex items-center gap-2.5 pl-2 border-l border-gray-200">
+          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold cursor-pointer select-none shadow-[0_0_0_2px_white,0_0_0_3px_rgba(99,102,241,0.3)]">
+            SS
+          </div>
         </div>
       </div>
     </header>
