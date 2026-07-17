@@ -314,7 +314,7 @@ Database link: https://drive.google.com/drive/folders/1HXqqo1ish-tchX1AVGgflIvPo
 
 Clone Repository
 
-git clone https://github.com/your-username/ShelfSense.git
+git clone https://github.com/VishnuSinghInfinity/smart-inventory
 cd ShelfSense
 
 ---
