@@ -13,6 +13,7 @@ import re
 import tempfile
 
 import streamlit as st
+from pathlib import Path
 from dotenv import load_dotenv
 
 from theme import inject_global_css, processing_banner
@@ -21,7 +22,9 @@ from model import extract_price, extract_delivery
 from tools.tools import search_restock, scrape_url, async_run_restock_pipeline
 from agents.comparing import comparing_agent
 
-load_dotenv()
+# Load .env relative to this file's folder (project root)
+env_path = Path(__file__).resolve().parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 st.set_page_config(
     page_title="ShelfSense — Restock Agent",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Package, TrendingUp, AlertTriangle, CheckCircle, ShoppingCart, ArrowRight } from 'lucide-react'
+import { Package, TrendingUp, AlertTriangle, CheckCircle, ShoppingCart } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { api, type SalesMetricsResponse, type ProductMaster } from '../lib/api'
 import { Card, CardTitle } from '../components/ui/Card'
@@ -10,7 +10,7 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend
 } from 'recharts'
 
-const CHART_COLORS = ['#6366F1', '#10B981', '#F59E0B', '#EF4444', '#0EA5E9', '#8B5CF6']
+const COLORS = ['#10B981','#8B5CF6','#F59E0B','#EF4444','#06B6D4','#EC4899']
 
 export default function Dashboard() {
   const [metrics, setMetrics] = useState<SalesMetricsResponse | null>(null)
@@ -42,93 +42,77 @@ export default function Dashboard() {
   const totalStock = inventory.reduce((s, [, m]) => s + m.current_stock, 0)
 
   return (
-    <div className="space-y-7">
-      {/* Page header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Overview</h1>
-          <p className="text-[13px] text-gray-500 mt-1">
-            Live inventory intelligence, sales velocity, and AI-driven restock signals.
-          </p>
-        </div>
-        <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-gray-400 bg-white border border-gray-200 rounded-lg px-3 py-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          Live
-        </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="font-heading font-extrabold text-[24px] tracking-tight shine-text">
+          ⚡ ShelfSense Overview
+        </h1>
+        <p className="text-[13px] mt-1 max-w-lg" style={{ color: '#475569' }}>
+          Live inventory intelligence, sales velocity, and AI-driven restock signals — all in one place.
+        </p>
       </div>
 
-      {/* KPI row */}
+      {/* Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-        <StatCard icon={<Package size={16} />} label="Total SKUs" value={inventory.length} color="violet" />
-        <StatCard icon={<ShoppingCart size={16} />} label="Total Stock" value={fmt(totalStock)} color="green" />
+        <StatCard icon={<Package size={18}/>} label="Total SKUs" value={inventory.length} color="green" />
+        <StatCard icon={<ShoppingCart size={18}/>} label="Total Stock" value={fmt(totalStock)} color="violet" />
         <StatCard
-          icon={<AlertTriangle size={16} />}
+          icon={<AlertTriangle size={18}/>}
           label="Discount Needed"
           value={metrics?.discount_triggers.length ?? 0}
           color="orange"
-          badge={metrics && metrics.discount_triggers.length > 0 ? 'Action' : undefined}
+          badge={metrics && metrics.discount_triggers.length > 0 ? 'Attention' : undefined}
           badgeColor="down"
         />
         <StatCard
-          icon={<TrendingUp size={16} />}
+          icon={<TrendingUp size={18}/>}
           label="Restock Needed"
           value={metrics?.restock_triggers.length ?? 0}
           color="red"
           badge={metrics && metrics.restock_triggers.length > 0 ? 'Critical' : undefined}
           badgeColor="down"
         />
-        <StatCard icon={<CheckCircle size={16} />} label="Healthy Products" value={metrics?.baseline_products.length ?? 0} color="cyan" />
+        <StatCard icon={<CheckCircle size={18}/>} label="Healthy Products" value={metrics?.baseline_products.length ?? 0} color="cyan" />
       </div>
 
       {/* Chart + Actions */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
         {/* Chart */}
-        <Card className="xl:col-span-2">
-          <CardTitle icon={<TrendingUp size={14} />}>
-            30-Day Sales Trend
-          </CardTitle>
+        <Card className="xl:col-span-2" hover>
+          <CardTitle icon={<span>📈</span>}>30-Day Sales Trend (Top SKUs)</CardTitle>
           {chartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={220}>
+            <ResponsiveContainer width="100%" height={240}>
               <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="2 6" stroke="#F3F4F6" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis
                   dataKey="day"
-                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 10, fill: '#475569' }}
                   tickLine={false}
                   axisLine={false}
                   interval={4}
                 />
                 <YAxis
-                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 10, fill: '#475569' }}
                   tickLine={false}
                   axisLine={false}
-                  width={32}
                 />
                 <Tooltip
                   contentStyle={{
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB',
+                    background: '#0F1420',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '12px',
                     fontSize: 12,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                    padding: '8px 12px'
+                    color: '#E2E8F0',
                   }}
-                  cursor={{ stroke: '#E5E7EB', strokeWidth: 1 }}
                 />
-                <Legend
-                  wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
-                  iconType="circle"
-                  iconSize={8}
-                />
+                <Legend wrapperStyle={{ fontSize: 11, color: '#64748B' }} />
                 {prods.map((p, i) => (
                   <Line
-                    key={p}
-                    type="monotone"
-                    dataKey={p}
-                    stroke={CHART_COLORS[i % CHART_COLORS.length]}
-                    strokeWidth={1.5}
-                    dot={false}
+                    key={p} type="monotone" dataKey={p}
+                    stroke={COLORS[i % COLORS.length]}
+                    strokeWidth={2} dot={false}
                     name={p}
-                    activeDot={{ r: 4, strokeWidth: 0 }}
                   />
                 ))}
               </LineChart>
@@ -139,64 +123,62 @@ export default function Dashboard() {
         </Card>
 
         {/* Action panel */}
-        <Card>
-          <CardTitle icon={<AlertTriangle size={14} />}>Action Required</CardTitle>
+        <Card hover>
+          <CardTitle icon={<span>🎯</span>}>Action Required</CardTitle>
           {metrics && (metrics.discount_triggers.length + metrics.restock_triggers.length) > 0 ? (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {[...metrics.discount_triggers, ...metrics.restock_triggers].slice(0, 6).map((t, i) => (
-                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
-                  <div className={`w-7 h-7 rounded-md flex items-center justify-center flex-shrink-0 text-xs ${
-                    t.action === 'discount'
-                      ? 'bg-amber-50 text-amber-600'
-                      : 'bg-indigo-50 text-indigo-600'
-                  }`}>
-                    {t.action === 'discount' ? '↓' : '↑'}
-                  </div>
+                <div
+                  key={i}
+                  className="flex items-start gap-3 py-2.5 px-3 rounded-xl"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                >
+                  <span className="text-lg flex-shrink-0">{t.action === 'discount' ? '🏷️' : '📥'}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-[13px] text-gray-800 capitalize truncate">{t.product}</div>
-                    <div className="text-[11px] text-gray-400 truncate">{t.suggested_value}</div>
+                    <div className="font-semibold text-[13px] capitalize truncate" style={{ color: '#E2E8F0' }}>{t.product}</div>
+                    <div className="text-[11px] mt-0.5" style={{ color: '#475569' }}>{t.suggested_value}</div>
                   </div>
-                  <Badge variant={t.urgency === 'urgent' ? 'red' : t.urgency === 'high' ? 'orange' : 'gray'}>
+                  <Badge variant={t.urgency === 'urgent' ? 'red' : t.urgency === 'high' ? 'orange' : 'violet'}>
                     {t.urgency}
                   </Badge>
                 </div>
               ))}
-              <Button
-                variant="secondary"
-                size="sm"
-                className="w-full justify-center mt-3"
-                icon={<ArrowRight size={12} />}
-                onClick={() => navigate('/assistant')}
-              >
-                View All Recommendations
+              <Button variant="secondary" size="sm" className="w-full mt-2 justify-center" onClick={() => navigate('/assistant')}>
+                View All Recommendations →
               </Button>
             </div>
           ) : (
-            <EmptyState icon="✓" title="All Clear" sub="No immediate actions needed." />
+            <EmptyState icon="✅" title="All Clear" sub="No immediate actions needed." />
           )}
         </Card>
       </div>
 
-      {/* Inventory snapshot + product catalog */}
+      {/* Inventory mini-grid + Product master */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {/* Mini shelf grid */}
         <Card>
-          <CardTitle icon={<Package size={14} />}>Live Inventory Snapshot</CardTitle>
+          <CardTitle icon={<span>📦</span>}>Live Inventory Snapshot</CardTitle>
           {inventory.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {inventory.slice(0, 9).map(([name, m]) => {
                 const trigger = metrics?.triggers.find(t => t.product === name)
-                const cls = trigger?.action === 'discount'
-                  ? { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', badge: 'orange' as const, label: 'Discount' }
-                  : trigger?.action === 'restock'
-                    ? { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', badge: 'red' as const, label: 'Restock' }
-                    : { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', badge: 'green' as const, label: 'OK' }
-
+                const colorMap = {
+                  orange: { border: 'rgba(245,158,11,0.4)', bg: 'rgba(245,158,11,0.06)', badge: 'orange' as const },
+                  red:    { border: 'rgba(239,68,68,0.4)',  bg: 'rgba(239,68,68,0.06)',  badge: 'red' as const },
+                  green:  { border: 'rgba(16,185,129,0.4)', bg: 'rgba(16,185,129,0.06)', badge: 'green' as const },
+                }
+                const cls = trigger?.action === 'discount' ? colorMap.orange : trigger?.action === 'restock' ? colorMap.red : colorMap.green
                 return (
-                  <div key={name} className={`rounded-xl p-3.5 border ${cls.bg} ${cls.border}`}>
-                    <div className="text-[11px] font-medium text-gray-500 capitalize truncate mb-1.5">{name}</div>
-                    <div className="font-mono-custom text-[24px] font-bold text-gray-900 leading-none mb-2">{m.current_stock}</div>
-                    <Badge variant={cls.badge}>{cls.label}</Badge>
+                  <div
+                    key={name}
+                    className="rounded-xl p-3 relative overflow-hidden card-hover"
+                    style={{ border: `1px solid ${cls.border}`, background: cls.bg }}
+                  >
+                    <div className="text-[11px] font-semibold capitalize truncate mb-1" style={{ color: '#64748B' }}>{name}</div>
+                    <div className="font-mono-custom text-[22px] font-bold mb-2" style={{ color: '#F1F5F9' }}>{m.current_stock}</div>
+                    <Badge variant={cls.badge} className="mt-1">
+                      {trigger?.action.toUpperCase() ?? 'OK'}
+                    </Badge>
                   </div>
                 )
               })}
@@ -206,39 +188,37 @@ export default function Dashboard() {
           )}
         </Card>
 
-        {/* Product catalog table */}
+        {/* Product master table */}
         <Card noPad>
-          <div className="px-6 pt-6 pb-0">
-            <CardTitle icon={<ShoppingCart size={14} />}>Product Catalog</CardTitle>
+          <div className="px-5 pt-5 pb-3">
+            <CardTitle icon={<span>🏪</span>}>Product Catalog (inventory.csv)</CardTitle>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-[12px]">
               <thead>
-                <tr className="border-t border-gray-100">
-                  {['Product', 'Category', 'Stock', 'MRP', 'Expiry'].map(h => (
-                    <th key={h} className="text-left px-6 py-2.5 font-semibold text-gray-400 text-[10px] uppercase tracking-wider bg-gray-50/60 first:rounded-tl-none last:rounded-tr-none">
-                      {h}
-                    </th>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+                  {['Product','Category','Stock','MRP','Expiry'].map(h => (
+                    <th key={h} className="text-left px-4 py-3 font-bold uppercase tracking-wider text-[10px]" style={{ color: '#475569' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {master ? Object.entries(master).map(([name, d]) => (
-                  <tr key={name} className="border-t border-gray-50 hover:bg-gray-50/60 transition-colors group">
-                    <td className="px-6 py-3 font-medium text-[13px] text-gray-800 capitalize">{name}</td>
-                    <td className="px-6 py-3"><Badge variant="gray">{d.category}</Badge></td>
-                    <td className="px-6 py-3 font-mono-custom text-[12px] font-semibold text-gray-700">{d.current_stock}</td>
-                    <td className="px-6 py-3 font-mono-custom text-[12px] text-gray-600">{fmtCurrency(d.selling_price)}</td>
-                    <td className={`px-6 py-3 font-mono-custom text-[11px] ${d.days_until_expiry < 14 ? 'text-red-500 font-semibold' : 'text-gray-400'}`}>
+                  <tr
+                    key={name}
+                    className="table-row-hover transition-colors"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                  >
+                    <td className="px-4 py-3 font-semibold capitalize" style={{ color: '#E2E8F0' }}>{name}</td>
+                    <td className="px-4 py-3"><Badge variant="gray">{d.category}</Badge></td>
+                    <td className="px-4 py-3 font-mono-custom font-semibold" style={{ color: '#F1F5F9' }}>{d.current_stock}</td>
+                    <td className="px-4 py-3 font-mono-custom" style={{ color: '#94A3B8' }}>{fmtCurrency(d.selling_price)}</td>
+                    <td className={`px-4 py-3 font-mono-custom text-[11px]`} style={{ color: d.days_until_expiry < 14 ? '#F87171' : '#475569' }}>
                       {d.expiry_date}
                     </td>
                   </tr>
                 )) : (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-10 text-center text-[13px] text-gray-400">
-                      No master data available
-                    </td>
-                  </tr>
+                  <tr><td colSpan={5} className="px-4 py-8 text-center" style={{ color: '#475569' }}>No master data available</td></tr>
                 )}
               </tbody>
             </table>

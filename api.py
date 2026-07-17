@@ -13,13 +13,16 @@ import os
 import tempfile
 from typing import Optional
 
+from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-load_dotenv()
+# Load .env relative to this file to handle being run from subdirectories
+env_path = Path(__file__).resolve().parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # ── existing modules (untouched) ──────────────────────────────────────────────
 from detection import run_tracking, inventory_count, get_video_frame_count
@@ -593,3 +596,8 @@ def _parse_md_table(md_text: str) -> list:
             continue
         rows.append(dict(zip(header, cells)))
     return rows
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("api:app", host="127.0.0.1", port=8000, reload=True)

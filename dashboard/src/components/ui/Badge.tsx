@@ -1,64 +1,47 @@
 import { cn } from '../../lib/utils'
 import type { ReactNode } from 'react'
 
-type Variant = 'green' | 'red' | 'orange' | 'violet' | 'cyan' | 'gray' | 'pink' | 'indigo'
+type Variant = 'green' | 'red' | 'orange' | 'violet' | 'cyan' | 'gray' | 'pink'
 
-const variantClasses: Record<Variant, string> = {
-  green:  'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60',
-  red:    'bg-red-50 text-red-600 ring-1 ring-red-200/60',
-  orange: 'bg-amber-50 text-amber-700 ring-1 ring-amber-200/60',
-  violet: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/60',
-  indigo: 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/60',
-  cyan:   'bg-sky-50 text-sky-700 ring-1 ring-sky-200/60',
-  gray:   'bg-gray-100 text-gray-600 ring-1 ring-gray-200/60',
-  pink:   'bg-rose-50 text-rose-600 ring-1 ring-rose-200/60',
+const variantStyles: Record<Variant, { bg: string; color: string; border: string }> = {
+  green:  { bg: 'rgba(16,185,129,0.12)',  color: '#34D399', border: 'rgba(16,185,129,0.25)' },
+  red:    { bg: 'rgba(239,68,68,0.12)',   color: '#F87171', border: 'rgba(239,68,68,0.25)' },
+  orange: { bg: 'rgba(245,158,11,0.12)',  color: '#FCD34D', border: 'rgba(245,158,11,0.25)' },
+  violet: { bg: 'rgba(139,92,246,0.12)',  color: '#A78BFA', border: 'rgba(139,92,246,0.25)' },
+  cyan:   { bg: 'rgba(6,182,212,0.12)',   color: '#67E8F9', border: 'rgba(6,182,212,0.25)' },
+  gray:   { bg: 'rgba(255,255,255,0.07)', color: '#94A3B8', border: 'rgba(255,255,255,0.12)' },
+  pink:   { bg: 'rgba(236,72,153,0.12)',  color: '#F9A8D4', border: 'rgba(236,72,153,0.25)' },
 }
 
-export function Badge({
-  children, variant = 'gray', className
-}: {
-  children: ReactNode; variant?: Variant; className?: string
-}) {
+export function Badge({ children, variant = 'gray', className }: { children: ReactNode; variant?: Variant; className?: string }) {
+  const s = variantStyles[variant]
   return (
-    <span className={cn(
-      'inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-md',
-      variantClasses[variant],
-      className
-    )}>
+    <span
+      className={cn('inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full', className)}
+      style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
+    >
       {children}
     </span>
   )
 }
 
 type AlertVariant = 'success' | 'error' | 'warning' | 'info'
-
-const alertClasses: Record<AlertVariant, string> = {
-  success: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
-  error:   'bg-red-50 text-red-800 border border-red-200',
-  warning: 'bg-amber-50 text-amber-800 border border-amber-200',
-  info:    'bg-indigo-50 text-indigo-800 border border-indigo-200',
+const alertStyles: Record<AlertVariant, { bg: string; color: string; border: string }> = {
+  success: { bg: 'rgba(16,185,129,0.1)',  color: '#34D399', border: 'rgba(16,185,129,0.2)' },
+  error:   { bg: 'rgba(239,68,68,0.1)',   color: '#F87171', border: 'rgba(239,68,68,0.2)' },
+  warning: { bg: 'rgba(245,158,11,0.1)',  color: '#FCD34D', border: 'rgba(245,158,11,0.2)' },
+  info:    { bg: 'rgba(139,92,246,0.1)',  color: '#A78BFA', border: 'rgba(139,92,246,0.2)' },
 }
 
-const alertIconDefault: Record<AlertVariant, string> = {
-  success: '✓',
-  error: '✕',
-  warning: '⚠',
-  info: 'ℹ',
-}
-
-export function Alert({
-  children, variant = 'info', icon
-}: {
-  children: ReactNode; variant?: AlertVariant; icon?: string
-}) {
-  const iconToShow = icon ?? alertIconDefault[variant]
+export function Alert({ children, variant = 'info', icon }: { children: ReactNode; variant?: AlertVariant; icon?: string }) {
+  const s = alertStyles[variant]
   return (
-    <div className={cn(
-      'rounded-lg px-4 py-3 flex items-start gap-3 text-[13px] font-medium leading-relaxed',
-      alertClasses[variant]
-    )}>
-      <span className="flex-shrink-0 text-[13px] font-bold mt-px">{iconToShow}</span>
-      <span>{children}</span>
+    <div
+      className="rounded-xl p-3.5 flex items-start gap-2.5 text-[13px] font-medium"
+      style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
+    >
+      {icon && <span className="text-base flex-shrink-0 mt-0.5">{icon}</span>}
+      <span style={{ color: '#CBD5E1' }}>{children}</span>
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { Play, X, Video, Settings, AlertCircle, CheckCircle2, Loader2, Package } from 'lucide-react'
+import { Play, X } from 'lucide-react'
 import { api, type DetectionProgressEvent } from '../lib/api'
 import { useInventoryStore } from '../hooks/useInventoryStore'
 import { Card, CardTitle } from '../components/ui/Card'
@@ -19,66 +19,99 @@ interface FrameProgressProps {
 
 function FrameProgress({ frame, total, pct, onCancel }: FrameProgressProps) {
   return (
-    <div className="bg-white border border-indigo-200/60 rounded-xl p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div
+      className="rounded-2xl p-5"
+      style={{
+        background: 'rgba(16,185,129,0.06)',
+        border: '1px solid rgba(16,185,129,0.2)',
+        boxShadow: '0 0 32px rgba(16,185,129,0.08)',
+      }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
+          {/* Animated radar pulse */}
           <div className="relative w-9 h-9 flex-shrink-0">
-            <div className="absolute inset-0 rounded-full bg-indigo-500/20 animate-ping" />
-            <div className="relative w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center">
-              <Loader2 size={16} className="text-white spinner" />
+            <div
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{ background: '#10B981', opacity: 0.2 }}
+            />
+            <div
+              className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #10B981, #0D9488)' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
             </div>
           </div>
           <div>
-            <div className="font-semibold text-[13px] text-gray-900">YOLO + ByteTrack Running</div>
-            <div className="text-[11px] text-gray-500 mt-0.5">Analyzing shelf frames…</div>
+            <div className="font-heading font-bold text-[14px]" style={{ color: '#E2E8F0' }}>YOLO + ByteTrack Running</div>
+            <div className="text-[11px] font-medium mt-0.5" style={{ color: '#10B981' }}>Analyzing shelf frames...</div>
           </div>
         </div>
         <button
           onClick={onCancel}
-          className="w-7 h-7 rounded-md bg-gray-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-gray-400 transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            color: '#F87171'
+          }}
           title="Cancel detection"
         >
-          <X size={13} />
+          <X size={12} />
         </button>
       </div>
 
-      {/* Frame counter */}
-      <div className="flex items-baseline justify-between mb-3">
+      {/* Frame counter row */}
+      <div className="flex items-end justify-between mb-3">
         <div className="flex items-baseline gap-1.5">
-          <span className="font-mono-custom text-[28px] font-bold text-gray-900 leading-none tabular-nums">
+          <span className="font-mono-custom text-[28px] font-bold leading-none tabular-nums" style={{ color: '#10B981' }}>
             {frame.toLocaleString()}
           </span>
-          <span className="text-[12px] text-gray-400">
-            / {total > 0 ? total.toLocaleString() : '—'} frames
+          <span className="text-[13px] font-medium" style={{ color: '#475569' }}>
+            / {total > 0 ? total.toLocaleString() : '?'} frames
           </span>
         </div>
-        <span className="font-mono-custom text-[16px] font-semibold text-indigo-600 tabular-nums">
+        <div className="font-mono-custom text-[20px] font-bold tabular-nums" style={{ color: '#94A3B8' }}>
           {pct.toFixed(1)}%
-        </span>
+        </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+      <div className="h-2.5 rounded-full overflow-hidden mb-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div
-          className="h-full rounded-full progress-fill transition-all duration-300"
-          style={{ width: `${Math.max(2, pct)}%` }}
-        />
+          className="h-full rounded-full transition-all duration-300 relative overflow-hidden"
+          style={{
+            width: `${Math.max(2, pct)}%`,
+            background: 'linear-gradient(90deg, #10B981, #06B6D4)',
+          }}
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+              animation: 'shimmer 1.5s ease-in-out infinite',
+              backgroundSize: '200% 100%'
+            }}
+          />
+        </div>
       </div>
 
-      {/* Frame strip */}
+      {/* Mini frame strip */}
       <FrameStrip pct={pct} />
 
       {/* Stats row */}
-      <div className="flex gap-3 mt-4">
+      <div className="flex gap-3 mt-3">
         {[
-          { label: 'Processed', value: frame.toLocaleString(), color: 'bg-indigo-50 text-indigo-700' },
-          { label: 'Remaining', value: total > 0 ? (total - frame).toLocaleString() : '—', color: 'bg-gray-50 text-gray-600' },
-          { label: 'Total', value: total > 0 ? total.toLocaleString() : '—', color: 'bg-emerald-50 text-emerald-700' },
+          { label: 'PROCESSED', value: frame.toLocaleString(), color: 'rgba(16,185,129,0.12)', textColor: '#10B981' },
+          { label: 'REMAINING', value: total > 0 ? (total - frame).toLocaleString() : '—', color: 'rgba(255,255,255,0.04)', textColor: '#94A3B8' },
+          { label: 'TOTAL',     value: total > 0 ? total.toLocaleString() : '—', color: 'rgba(6,182,212,0.12)', textColor: '#06B6D4' },
         ].map(s => (
-          <div key={s.label} className={`flex-1 rounded-lg p-2.5 text-center ${s.color}`}>
-            <div className="font-mono-custom font-bold text-[12px]">{s.value}</div>
-            <div className="text-[9px] font-semibold uppercase tracking-wider mt-0.5 opacity-60">{s.label}</div>
+          <div key={s.label} className="flex-1 rounded-xl p-2.5 text-center" style={{ background: s.color }}>
+            <div className="font-mono-custom font-bold text-[13px]" style={{ color: s.textColor }}>{s.value}</div>
+            <div className="text-[9px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#475569' }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -86,23 +119,24 @@ function FrameProgress({ frame, total, pct, onCancel }: FrameProgressProps) {
   )
 }
 
+// Animated mini frame strip
 function FrameStrip({ pct }: { pct: number }) {
   const COLS = 20
   const filled = Math.round((pct / 100) * COLS)
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5 mt-1">
       {Array.from({ length: COLS }, (_, i) => (
         <div
           key={i}
-          className={cn(
-            'flex-1 rounded-sm transition-all duration-150',
-            i < filled
-              ? 'bg-indigo-500'
+          className="flex-1 rounded-sm transition-all duration-150"
+          style={{
+            height: i % 3 === 0 ? '14px' : i % 3 === 1 ? '10px' : '12px',
+            background: i < filled
+              ? 'linear-gradient(180deg, #10B981, #06B6D4)'
               : i === filled
-                ? 'bg-indigo-300 animate-pulse'
-                : 'bg-gray-100'
-          )}
-          style={{ height: i % 3 === 0 ? '14px' : i % 3 === 1 ? '10px' : '12px' }}
+                ? 'rgba(16,185,129,0.5)'
+                : 'rgba(255,255,255,0.05)',
+          }}
         />
       ))}
     </div>
@@ -129,11 +163,13 @@ export default function InventoryMonitoring() {
     }
   }, [inventory, setInventory])
 
+  // Detection progress state
   const [detecting, setDetecting] = useState(false)
   const [totalFrames, setTotalFrames] = useState(0)
   const [currentFrame, setCurrentFrame] = useState(0)
   const [pct, setPct] = useState(0)
   const abortRef = useRef<AbortController | null>(null)
+
   const videoInputRef = useRef<HTMLInputElement>(null)
 
   const items = inventory
@@ -142,6 +178,7 @@ export default function InventoryMonitoring() {
   const grandTotal = inventory?.grand_total ?? items.reduce((s, [, v]) => s + v, 0)
   const lowCount = items.filter(([, v]) => v < threshold).length
 
+  // Reset progress when video file changes
   useEffect(() => {
     setCurrentFrame(0)
     setPct(0)
@@ -163,22 +200,24 @@ export default function InventoryMonitoring() {
     setCurrentFrame(0)
     setPct(0)
     setTotalFrames(0)
-    setMessage({ type: 'info', text: 'Uploading video and starting YOLO analysis…' })
+    setMessage({ type: 'info', text: '⏳ Uploading video and starting YOLO analysis…' })
 
     const controller = api.detectVideoStream(
       videoFile,
       conf,
       weights,
+      // onEvent
       (event: DetectionProgressEvent) => {
         if (event.type === 'start') {
           setTotalFrames(event.total_frames)
-          setMessage({ type: 'info', text: `Scanning ${event.total_frames.toLocaleString()} frames…` })
+          setMessage({ type: 'info', text: `📹 Scanning ${event.total_frames.toLocaleString()} frames…` })
         } else if (event.type === 'progress') {
           setCurrentFrame(event.frame)
           setPct(event.pct)
           setTotalFrames(event.total)
         }
       },
+      // onDone
       (inv) => {
         setInventory(inv)
         setDetecting(false)
@@ -186,25 +225,30 @@ export default function InventoryMonitoring() {
         const skuCount = Object.keys(inv).filter(k => k !== 'grand_total').length
         setMessage({
           type: 'success',
-          text: `Detection complete! Found ${skuCount} SKUs with ${inv.grand_total} total units.`,
+          text: `✅ Detection complete! Found ${skuCount} SKUs with ${inv.grand_total} total units.`,
         })
       },
+      // onError
       (detail) => {
         setDetecting(false)
-        setMessage({ type: 'error', text: `Detection failed: ${detail}` })
+        setMessage({ type: 'error', text: `❌ Detection failed: ${detail}` })
       }
     )
 
     abortRef.current = controller
   }
 
+  // Removed loadSample and loadJson as requested to restrict to live YOLO analysis only
+
   return (
     <div className="space-y-6">
-      {/* Page header */}
+      {/* Header */}
       <div>
-        <h1 className="text-[22px] font-bold text-gray-900 tracking-tight">Inventory Monitoring</h1>
-        <p className="text-[13px] text-gray-500 mt-1">
-          Upload a shelf video for YOLO + ByteTrack frame-by-frame analysis of your live product inventory.
+        <h1 className="font-heading font-extrabold text-[24px] tracking-tight" style={{ color: '#F1F5F9' }}>
+          📦 Inventory Monitoring
+        </h1>
+        <p className="text-[13px] mt-1" style={{ color: '#475569' }}>
+          Upload a shelf video for YOLO + ByteTrack frame-by-frame detection to analyze your live product inventory.
         </p>
       </div>
 
@@ -214,6 +258,7 @@ export default function InventoryMonitoring() {
         </Alert>
       )}
 
+      {/* ── FRAME PROGRESS (shows while detecting) ── */}
       {detecting && (
         <FrameProgress
           frame={currentFrame}
@@ -224,20 +269,27 @@ export default function InventoryMonitoring() {
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        {/* Video upload card */}
-        <Card>
-          <CardTitle icon={<Video size={14} />}>Upload Shelf Video</CardTitle>
+        {/* ── VIDEO UPLOAD CARD ── */}
+        <Card hover>
+          <CardTitle icon={<span>🎥</span>}>Upload Shelf Video</CardTitle>
 
           {/* Drop zone */}
           <div
             className={cn(
-              'border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-150',
-              dragOver
-                ? 'border-indigo-400 bg-indigo-50/60'
-                : videoFile
-                  ? 'border-indigo-300 bg-indigo-50/30'
-                  : 'border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/20'
+              'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200',
             )}
+            style={{
+              borderColor: dragOver
+                ? 'rgba(16,185,129,0.6)'
+                : videoFile
+                  ? 'rgba(16,185,129,0.35)'
+                  : 'rgba(255,255,255,0.1)',
+              background: dragOver
+                ? 'rgba(16,185,129,0.08)'
+                : videoFile
+                  ? 'rgba(16,185,129,0.04)'
+                  : 'rgba(255,255,255,0.02)',
+            }}
             onDragOver={e => { e.preventDefault(); setDragOver(true) }}
             onDragLeave={() => setDragOver(false)}
             onDrop={e => {
@@ -254,64 +306,71 @@ export default function InventoryMonitoring() {
               className="hidden"
               onChange={e => e.target.files?.[0] && setVideoFile(e.target.files[0])}
             />
-            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-              {videoFile
-                ? <CheckCircle2 size={22} className="text-emerald-500" />
-                : <Video size={22} className="text-gray-400" />
-              }
-            </div>
-            <div className="font-semibold text-[14px] text-gray-800 mb-1">
+            <div className="text-4xl mb-3">{videoFile ? '🎬' : '📹'}</div>
+            <div className="font-heading font-bold mb-1" style={{ color: '#E2E8F0' }}>
               {videoFile ? videoFile.name : 'Drop shelf video here'}
             </div>
-            <div className="text-[12px] text-gray-400">
+            <div className="text-[12px]" style={{ color: '#475569' }}>
               {videoFile
                 ? `${(videoFile.size / 1024 / 1024).toFixed(1)} MB · Click to change`
                 : 'MP4, MOV, AVI, MKV — YOLO + ByteTrack will count every SKU'}
             </div>
           </div>
 
-          {/* Controls */}
+          {/* Sliders */}
           <div className="mt-5 space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
-                  Detection Confidence
-                </label>
-                <span className="font-mono-custom text-[12px] font-bold text-indigo-600">{conf}</span>
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>
+                Detection Confidence
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="range" min={0.1} max={0.95} step={0.05} value={conf}
+                  onChange={e => setConf(+e.target.value)}
+                  disabled={detecting}
+                  className="flex-1 disabled:opacity-40"
+                />
+                <span className="font-mono-custom text-sm font-bold w-10 text-right" style={{ color: '#10B981' }}>{conf}</span>
               </div>
-              <input
-                type="range" min={0.1} max={0.95} step={0.05} value={conf}
-                onChange={e => setConf(+e.target.value)}
-                disabled={detecting}
-                className="w-full"
-              />
             </div>
-
             <div>
-              <label className="block text-[11px] font-semibold text-gray-600 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>
                 YOLO Weights Path
               </label>
               <input
                 value={weights}
                 onChange={e => setWeights(e.target.value)}
                 disabled={detecting}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] bg-white outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 transition-all disabled:opacity-40 disabled:bg-gray-50 font-mono-custom"
+                className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none transition-all disabled:opacity-40"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.09)',
+                  color: '#E2E8F0',
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'rgba(16,185,129,0.4)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)')}
               />
             </div>
 
+            {/* Run / Cancel button */}
             {detecting ? (
               <button
                 onClick={cancelDetection}
-                className="w-full py-2.5 rounded-lg bg-white border border-red-200 text-red-600 font-semibold text-[13px] flex items-center justify-center gap-2 hover:bg-red-50 transition-colors"
+                className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  color: '#F87171'
+                }}
               >
-                <X size={14} /> Cancel Detection
+                <X size={15} /> Cancel Detection
               </button>
             ) : (
               <Button
                 variant="primary"
                 className="w-full justify-center"
                 disabled={!videoFile}
-                icon={<Play size={14} />}
+                icon={<Play size={15} />}
                 onClick={runDetection}
               >
                 Run YOLO Detection
@@ -320,53 +379,45 @@ export default function InventoryMonitoring() {
           </div>
         </Card>
 
-        {/* Settings card */}
-        <Card>
-          <CardTitle icon={<Settings size={14} />}>Detection Settings</CardTitle>
-          <p className="text-[12px] text-gray-500 mb-5 leading-relaxed">
-            Products with detected counts below this threshold will be flagged for restocking and competitor analysis.
+        {/* ── SETTINGS CARD ── */}
+        <Card hover>
+          <CardTitle icon={<span>⚙️</span>}>Low-Stock Threshold</CardTitle>
+          <p className="text-[13px] mb-4" style={{ color: '#475569' }}>
+            Products with detected counts below this threshold will be flagged for bulk restocking and competitor analysis.
           </p>
-
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
-                Low-Stock Threshold
-              </label>
-              <span className="font-mono-custom text-[12px] font-bold text-indigo-600">{threshold} units</span>
-            </div>
+          <div className="flex items-center gap-3">
             <input
               type="range" min={10} max={150} step={5} value={threshold}
               onChange={e => setThreshold(+e.target.value)}
-              className="w-full"
+              className="flex-1"
             />
-            <div className="flex items-center justify-between mt-2 text-[10px] text-gray-400">
-              <span>10</span>
-              <span>150</span>
-            </div>
+            <span className="font-mono-custom text-sm font-bold w-12 text-right" style={{ color: '#10B981' }}>{threshold} u</span>
           </div>
 
-          {/* Info boxes */}
-          <div className="mt-6 space-y-2">
-            {[
-              { icon: <Video size={13} className="text-indigo-500" />, label: 'YOLO v8 Object Detection', desc: 'Frame-level product counting' },
-              { icon: <Settings size={13} className="text-gray-500" />, label: 'ByteTrack Tracking', desc: 'Robust multi-object tracker' },
-              { icon: <AlertCircle size={13} className="text-amber-500" />, label: 'Confidence Threshold', desc: `Minimum ${conf} for valid detection` },
-            ].map(item => (
-              <div key={item.label} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <div className="flex-shrink-0">{item.icon}</div>
-                <div>
-                  <div className="text-[12px] font-semibold text-gray-700">{item.label}</div>
-                  <div className="text-[11px] text-gray-400">{item.desc}</div>
+          {/* Quick status summary */}
+          {inventory && (
+            <div className="mt-6 space-y-3">
+              <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#475569' }}>
+                Current Status
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                  <div className="font-mono-custom font-bold text-lg" style={{ color: '#10B981' }}>{items.length - lowCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#10B981' }}>In Stock</div>
+                </div>
+                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                  <div className="font-mono-custom font-bold text-lg" style={{ color: '#F87171' }}>{lowCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#F87171' }}>Low Stock</div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </Card>
       </div>
 
-      {/* Shelf grid */}
+      {/* ── SHELF GRID ── */}
       <Card>
-        <CardTitle icon={<Package size={14} />}>Shelf Overview</CardTitle>
+        <CardTitle icon={<span>🗂️</span>}>Shelf Overview</CardTitle>
 
         {!inventory ? (
           <EmptyState
@@ -376,11 +427,11 @@ export default function InventoryMonitoring() {
           />
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-              <StatCard icon={<Package size={16} />} label="Total Units" value={fmt(grandTotal)} color="green" />
-              <StatCard icon={<CheckCircle2 size={16} />} label="SKUs Tracked" value={items.length} color="violet" />
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-5">
+              <StatCard icon={<span>📦</span>} label="Total Units" value={fmt(grandTotal)} color="green" />
+              <StatCard icon={<span>🏷️</span>} label="SKUs Tracked" value={items.length} color="violet" />
               <StatCard
-                icon={<AlertCircle size={16} />}
+                icon={<span>⚠️</span>}
                 label="Low-Stock SKUs"
                 value={lowCount}
                 color={lowCount > 0 ? 'orange' : 'cyan'}
@@ -393,22 +444,26 @@ export default function InventoryMonitoring() {
                 const maxVal = Math.max(...items.map(([, v]) => v), 1)
                 const barPct = Math.max(6, Math.min(100, (count / maxVal) * 100))
                 const colors = {
-                  ok:       { bg: 'bg-emerald-50', border: 'border-emerald-200', bar: 'bg-emerald-400', badge: 'green' as const, label: 'OK' },
-                  low:      { bg: 'bg-amber-50',   border: 'border-amber-200',   bar: 'bg-amber-400',   badge: 'orange' as const, label: 'LOW' },
-                  critical: { bg: 'bg-red-50',     border: 'border-red-200',     bar: 'bg-red-400',     badge: 'red' as const,    label: 'CRIT' },
+                  ok:       { border: 'rgba(16,185,129,0.35)',  bar: 'linear-gradient(90deg,#10B981,#059669)', badge: 'green'  as const, label: 'IN STOCK', bg: 'rgba(16,185,129,0.05)' },
+                  low:      { border: 'rgba(245,158,11,0.35)',  bar: 'linear-gradient(90deg,#F59E0B,#D97706)', badge: 'orange' as const, label: 'LOW',      bg: 'rgba(245,158,11,0.05)' },
+                  critical: { border: 'rgba(239,68,68,0.4)',    bar: 'linear-gradient(90deg,#EF4444,#DC2626)', badge: 'red'    as const, label: 'CRITICAL',  bg: 'rgba(239,68,68,0.05)'  },
                 }[cls]
 
                 return (
-                  <div key={name} className={`rounded-xl p-3 border transition-all duration-150 hover:-translate-y-0.5 ${colors.bg} ${colors.border}`}>
-                    <div className="text-[10px] font-semibold text-gray-500 capitalize truncate mb-1.5">{name}</div>
-                    <div className="font-mono-custom text-[20px] font-bold text-gray-900 leading-none mb-2">{count}</div>
-                    <div className="h-1 bg-white/60 rounded-full overflow-hidden mb-2">
+                  <div
+                    key={name}
+                    className="rounded-xl p-3 card-hover"
+                    style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+                  >
+                    <div className="text-[11px] font-semibold capitalize truncate mb-1.5" style={{ color: '#64748B' }}>{name}</div>
+                    <div className="font-mono-custom text-[22px] font-bold mb-2 leading-none" style={{ color: '#F1F5F9' }}>{count}</div>
+                    <div className="h-1 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
                       <div
-                        className={`h-full rounded-full ${colors.bar} transition-all`}
-                        style={{ width: `${barPct}%` }}
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${barPct}%`, background: colors.bar }}
                       />
                     </div>
-                    <Badge variant={colors.badge}>{colors.label}</Badge>
+                    <Badge variant={colors.badge} className="text-[8px]">{colors.label}</Badge>
                   </div>
                 )
               })}
@@ -417,6 +472,7 @@ export default function InventoryMonitoring() {
         )}
       </Card>
 
+      {/* shimmer keyframes */}
       <style>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }

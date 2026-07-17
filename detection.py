@@ -7,6 +7,8 @@ because importing model.py directly currently crashes (see README).
 """
  
 from collections import defaultdict
+
+# pyrefly: ignore [missing-import]
 from ultralytics import YOLO
  
  

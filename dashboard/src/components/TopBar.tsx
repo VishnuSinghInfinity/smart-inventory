@@ -1,15 +1,26 @@
-import { Menu, Bell } from 'lucide-react'
+import { Menu, Bell, Search, Wifi } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
 
-const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
-  '/':           { title: 'Dashboard',            subtitle: 'Overview of your retail intelligence' },
-  '/inventory':  { title: 'Inventory Monitoring',  subtitle: 'YOLO + ByteTrack live detection' },
-  '/store':      { title: 'Store',                subtitle: 'Browse all products in the retail inventory' },
-  '/sales':      { title: 'Sales Prediction',       subtitle: '30-day forecasts and trend analysis' },
-  '/competitor': { title: 'Competitor Analysis',    subtitle: 'Autonomous restock pipeline' },
-  '/assistant':  { title: 'AI Sales Assistant',     subtitle: 'Groq-powered recommendations' },
-  '/reports':    { title: 'Reports',               subtitle: 'Executive inventory report' },
-  '/settings':   { title: 'Settings',              subtitle: 'Configure your workspace' },
+const PAGE_TITLES: Record<string, string> = {
+  '/':           'Dashboard',
+  '/inventory':  'Inventory Monitoring',
+  '/store':      'Store',
+  '/sales':      'Sales Prediction',
+  '/competitor': 'Competitor Analysis',
+  '/assistant':  'AI Sales Assistant',
+  '/reports':    'Reports',
+  '/settings':   'Settings',
+}
+
+const PAGE_SUBTITLES: Record<string, string> = {
+  '/':           'Live AI-powered inventory intelligence',
+  '/inventory':  'YOLO + ByteTrack shelf detection',
+  '/store':      'Browse all products currently available inside the retail inventory.',
+  '/sales':      '30-day velocity & trend analysis',
+  '/competitor': 'Tavily → Playwright → Groq pipeline',
+  '/assistant':  'Groq-powered recommendations engine',
+  '/reports':    'Full product metrics & export',
+  '/settings':   'System configuration',
 }
 
 interface TopBarProps {
@@ -18,39 +29,114 @@ interface TopBarProps {
 
 export function TopBar({ onToggle }: TopBarProps) {
   const { pathname } = useLocation()
-  const page = PAGE_TITLES[pathname] ?? { title: 'ShelfSense', subtitle: '' }
+  const title = PAGE_TITLES[pathname] ?? 'ShelfSense'
+  const subtitle = PAGE_SUBTITLES[pathname] ?? ''
+
+  const now = new Date().toLocaleString('en-IN', {
+    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false
+  })
 
   return (
-    <header className="h-14 bg-white border-b border-gray-200/80 flex items-center px-5 gap-4 flex-shrink-0 z-50 shadow-[0_1px_0_rgba(0,0,0,0.04)]">
+    <header
+      className="h-[60px] flex items-center px-5 gap-4 flex-shrink-0 z-50"
+      style={{
+        background: 'rgba(8,11,18,0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      {/* Toggle */}
       <button
         onClick={onToggle}
-        className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all duration-100"
+        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 flex-shrink-0"
+        style={{
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          color: '#94A3B8'
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.09)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
         aria-label="Toggle sidebar"
       >
         <Menu size={15} />
       </button>
 
-      {/* Page title */}
+      {/* Page Title */}
       <div className="flex-1 min-w-0">
-        <h1 className="font-semibold text-[14px] text-gray-900 leading-none tracking-tight truncate">
-          {page.title}
+        <h1 className="font-heading font-bold text-[15px] leading-none truncate" style={{ color: '#F1F5F9' }}>
+          {title}
         </h1>
-        <p className="text-[11px] text-gray-400 mt-0.5 hidden sm:block truncate">
-          {page.subtitle}
+        <p className="text-[11px] mt-0.5 truncate" style={{ color: '#475569' }}>
+          {subtitle}
         </p>
       </div>
 
-      <div className="flex items-center gap-2">
-        {/* Notification bell (presentational) */}
-        <button className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-all duration-100">
-          <Bell size={14} />
+      {/* Right controls */}
+      <div className="flex items-center gap-2.5 flex-shrink-0">
+
+        {/* Search (decorative) */}
+        <button
+          className="hidden sm:flex w-8 h-8 rounded-lg items-center justify-center transition-all duration-200"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#6B7280'
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#94A3B8')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#6B7280')}
+          aria-label="Search"
+        >
+          <Search size={14} />
         </button>
 
+        {/* Notification (decorative) */}
+        <button
+          className="relative hidden sm:flex w-8 h-8 rounded-lg items-center justify-center transition-all duration-200"
+          style={{
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            color: '#6B7280'
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#94A3B8')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#6B7280')}
+          aria-label="Notifications"
+        >
+          <Bell size={14} />
+          <span
+            className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full"
+            style={{ background: '#10B981' }}
+          />
+        </button>
+
+        {/* System status */}
+        <div
+          className="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+          style={{
+            background: 'rgba(16,185,129,0.1)',
+            border: '1px solid rgba(16,185,129,0.2)',
+          }}
+        >
+          <Wifi size={11} style={{ color: '#10B981' }} />
+          <span className="text-[10px] font-bold tracking-wider" style={{ color: '#10B981' }}>
+            ONLINE
+          </span>
+        </div>
+
+        {/* Time */}
+        <span className="font-mono-custom text-[11px] hidden lg:block" style={{ color: '#4B5563' }}>
+          {now}
+        </span>
+
         {/* Avatar */}
-        <div className="flex items-center gap-2.5 pl-2 border-l border-gray-200">
-          <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-[11px] font-bold cursor-pointer select-none shadow-[0_0_0_2px_white,0_0_0_3px_rgba(99,102,241,0.3)]">
-            SS
-          </div>
+        <div
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-[11px] font-bold cursor-pointer select-none flex-shrink-0 transition-all duration-200"
+          style={{
+            background: 'linear-gradient(135deg, #10B981, #0D9488)',
+            boxShadow: '0 0 12px rgba(16,185,129,0.35)'
+          }}
+        >
+          SS
         </div>
       </div>
     </header>
