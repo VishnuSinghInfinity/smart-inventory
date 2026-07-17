@@ -308,7 +308,7 @@ ShelfSense/
 
 ---
 
-Database link: https://drive.google.com/drive/folders/1HXqqo1ish-tchX1AVGgflIvPox4apT_J?usp=sharing 
+Dataset link: https://drive.google.com/drive/folders/1HXqqo1ish-tchX1AVGgflIvPox4apT_J?usp=sharing 
 
 🚀 Installation
 
