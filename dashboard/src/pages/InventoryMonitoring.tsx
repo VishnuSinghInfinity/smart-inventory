@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Play, X } from 'lucide-react'
-import { api, type InventoryData, type DetectionProgressEvent } from '../lib/api'
+import { api, type DetectionProgressEvent } from '../lib/api'
 import { useInventoryStore } from '../hooks/useInventoryStore'
 import { Card, CardTitle } from '../components/ui/Card'
 import { Button, EmptyState, StatCard } from '../components/ui'
@@ -19,87 +19,107 @@ interface FrameProgressProps {
 
 function FrameProgress({ frame, total, pct, onCancel }: FrameProgressProps) {
   return (
-    <div className="bg-white border-2 border-violet-200 rounded-2xl p-5 shadow-lg">
+    <div
+      className="rounded-2xl p-5"
+      style={{
+        background: 'rgba(16,185,129,0.06)',
+        border: '1px solid rgba(16,185,129,0.2)',
+        boxShadow: '0 0 32px rgba(16,185,129,0.08)',
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {/* Animated radar pulse */}
           <div className="relative w-9 h-9 flex-shrink-0">
-            <div className="absolute inset-0 rounded-full bg-violet-500 opacity-20 animate-ping" />
-            <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <div
+              className="absolute inset-0 rounded-full animate-ping"
+              style={{ background: '#10B981', opacity: 0.2 }}
+            />
+            <div
+              className="relative w-9 h-9 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #10B981, #0D9488)' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
               </svg>
             </div>
           </div>
           <div>
-            <div className="font-heading font-bold text-[14px] text-gray-900">YOLO + ByteTrack Running</div>
-            <div className="text-[11px] text-gray-400 font-medium mt-0.5">Analyzing shelf frames...</div>
+            <div className="font-heading font-bold text-[14px]" style={{ color: '#E2E8F0' }}>YOLO + ByteTrack Running</div>
+            <div className="text-[11px] font-medium mt-0.5" style={{ color: '#10B981' }}>Analyzing shelf frames...</div>
           </div>
         </div>
         <button
           onClick={onCancel}
-          className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-gray-400 transition-colors"
+          className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors"
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            color: '#F87171'
+          }}
           title="Cancel detection"
         >
-          <X size={13} />
+          <X size={12} />
         </button>
       </div>
 
       {/* Frame counter row */}
-      <div className="flex items-end justify-between mb-2">
+      <div className="flex items-end justify-between mb-3">
         <div className="flex items-baseline gap-1.5">
-          <span className="font-mono-custom text-[28px] font-bold text-violet-600 leading-none tabular-nums">
+          <span className="font-mono-custom text-[28px] font-bold leading-none tabular-nums" style={{ color: '#10B981' }}>
             {frame.toLocaleString()}
           </span>
-          <span className="text-[13px] text-gray-400 font-medium">
+          <span className="text-[13px] font-medium" style={{ color: '#475569' }}>
             / {total > 0 ? total.toLocaleString() : '?'} frames
           </span>
         </div>
-        <div className="font-mono-custom text-[20px] font-bold text-gray-700 tabular-nums">
+        <div className="font-mono-custom text-[20px] font-bold tabular-nums" style={{ color: '#94A3B8' }}>
           {pct.toFixed(1)}%
         </div>
       </div>
 
-      {/* Progress bar track */}
-      <div className="h-3 bg-gray-100 rounded-full overflow-hidden mb-3 relative">
-        {/* Shimmer overlay */}
+      {/* Progress bar */}
+      <div className="h-2.5 rounded-full overflow-hidden mb-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
         <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-500 via-pink-500 to-violet-600 transition-all duration-300 relative overflow-hidden"
-          style={{ width: `${Math.max(2, pct)}%` }}
+          className="h-full rounded-full transition-all duration-300 relative overflow-hidden"
+          style={{
+            width: `${Math.max(2, pct)}%`,
+            background: 'linear-gradient(90deg, #10B981, #06B6D4)',
+          }}
         >
           <div
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-            style={{ animation: 'shimmer 1.5s ease-in-out infinite', backgroundSize: '200% 100%' }}
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent)',
+              animation: 'shimmer 1.5s ease-in-out infinite',
+              backgroundSize: '200% 100%'
+            }}
           />
         </div>
       </div>
 
-      {/* Mini frame strip visualizer */}
+      {/* Mini frame strip */}
       <FrameStrip pct={pct} />
 
       {/* Stats row */}
       <div className="flex gap-3 mt-3">
-        <div className="flex-1 bg-violet-50 rounded-xl p-2.5 text-center">
-          <div className="font-mono-custom font-bold text-violet-700 text-[13px]">{frame.toLocaleString()}</div>
-          <div className="text-[9px] text-violet-400 font-bold uppercase tracking-wider mt-0.5">Processed</div>
-        </div>
-        <div className="flex-1 bg-gray-50 rounded-xl p-2.5 text-center">
-          <div className="font-mono-custom font-bold text-gray-600 text-[13px]">
-            {total > 0 ? (total - frame).toLocaleString() : '—'}
+        {[
+          { label: 'PROCESSED', value: frame.toLocaleString(), color: 'rgba(16,185,129,0.12)', textColor: '#10B981' },
+          { label: 'REMAINING', value: total > 0 ? (total - frame).toLocaleString() : '—', color: 'rgba(255,255,255,0.04)', textColor: '#94A3B8' },
+          { label: 'TOTAL',     value: total > 0 ? total.toLocaleString() : '—', color: 'rgba(6,182,212,0.12)', textColor: '#06B6D4' },
+        ].map(s => (
+          <div key={s.label} className="flex-1 rounded-xl p-2.5 text-center" style={{ background: s.color }}>
+            <div className="font-mono-custom font-bold text-[13px]" style={{ color: s.textColor }}>{s.value}</div>
+            <div className="text-[9px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#475569' }}>{s.label}</div>
           </div>
-          <div className="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Remaining</div>
-        </div>
-        <div className="flex-1 bg-emerald-50 rounded-xl p-2.5 text-center">
-          <div className="font-mono-custom font-bold text-emerald-600 text-[13px]">{total > 0 ? total.toLocaleString() : '—'}</div>
-          <div className="text-[9px] text-emerald-400 font-bold uppercase tracking-wider mt-0.5">Total</div>
-        </div>
+        ))}
       </div>
     </div>
   )
 }
 
-// Animated mini frame strip — shows "scanning" effect
+// Animated mini frame strip
 function FrameStrip({ pct }: { pct: number }) {
   const COLS = 20
   const filled = Math.round((pct / 100) * COLS)
@@ -108,15 +128,15 @@ function FrameStrip({ pct }: { pct: number }) {
       {Array.from({ length: COLS }, (_, i) => (
         <div
           key={i}
-          className={cn(
-            'flex-1 rounded-sm transition-all duration-150',
-            i < filled
-              ? 'bg-gradient-to-b from-violet-500 to-pink-500'
+          className="flex-1 rounded-sm transition-all duration-150"
+          style={{
+            height: i % 3 === 0 ? '14px' : i % 3 === 1 ? '10px' : '12px',
+            background: i < filled
+              ? 'linear-gradient(180deg, #10B981, #06B6D4)'
               : i === filled
-                ? 'bg-violet-300 animate-pulse'
-                : 'bg-gray-100'
-          )}
-          style={{ height: i % 3 === 0 ? '14px' : i % 3 === 1 ? '10px' : '12px' }}
+                ? 'rgba(16,185,129,0.5)'
+                : 'rgba(255,255,255,0.05)',
+          }}
         />
       ))}
     </div>
@@ -222,9 +242,12 @@ export default function InventoryMonitoring() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="font-heading font-extrabold text-[24px] tracking-tight text-gray-900">📦 Inventory Monitoring</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="font-heading font-extrabold text-[24px] tracking-tight" style={{ color: '#F1F5F9' }}>
+          📦 Inventory Monitoring
+        </h1>
+        <p className="text-[13px] mt-1" style={{ color: '#475569' }}>
           Upload a shelf video for YOLO + ByteTrack frame-by-frame detection to analyze your live product inventory.
         </p>
       </div>
@@ -245,21 +268,28 @@ export default function InventoryMonitoring() {
         />
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
         {/* ── VIDEO UPLOAD CARD ── */}
         <Card hover>
-          <CardTitle icon={<span className="bg-violet-50">🎥</span>}>Upload Shelf Video</CardTitle>
+          <CardTitle icon={<span>🎥</span>}>Upload Shelf Video</CardTitle>
 
           {/* Drop zone */}
           <div
             className={cn(
-              'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all',
-              dragOver
-                ? 'border-violet-400 bg-violet-50'
-                : videoFile
-                  ? 'border-violet-300 bg-violet-50/40'
-                  : 'border-gray-200 bg-gray-50 hover:border-violet-300 hover:bg-violet-50/30'
+              'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200',
             )}
+            style={{
+              borderColor: dragOver
+                ? 'rgba(16,185,129,0.6)'
+                : videoFile
+                  ? 'rgba(16,185,129,0.35)'
+                  : 'rgba(255,255,255,0.1)',
+              background: dragOver
+                ? 'rgba(16,185,129,0.08)'
+                : videoFile
+                  ? 'rgba(16,185,129,0.04)'
+                  : 'rgba(255,255,255,0.02)',
+            }}
             onDragOver={e => { e.preventDefault(); setDragOver(true) }}
             onDragLeave={() => setDragOver(false)}
             onDrop={e => {
@@ -277,10 +307,10 @@ export default function InventoryMonitoring() {
               onChange={e => e.target.files?.[0] && setVideoFile(e.target.files[0])}
             />
             <div className="text-4xl mb-3">{videoFile ? '🎬' : '📹'}</div>
-            <div className="font-heading font-bold text-gray-800 mb-1">
+            <div className="font-heading font-bold mb-1" style={{ color: '#E2E8F0' }}>
               {videoFile ? videoFile.name : 'Drop shelf video here'}
             </div>
-            <div className="text-[12px] text-gray-400">
+            <div className="text-[12px]" style={{ color: '#475569' }}>
               {videoFile
                 ? `${(videoFile.size / 1024 / 1024).toFixed(1)} MB · Click to change`
                 : 'MP4, MOV, AVI, MKV — YOLO + ByteTrack will count every SKU'}
@@ -290,7 +320,7 @@ export default function InventoryMonitoring() {
           {/* Sliders */}
           <div className="mt-5 space-y-4">
             <div>
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>
                 Detection Confidence
               </label>
               <div className="flex items-center gap-3">
@@ -298,20 +328,27 @@ export default function InventoryMonitoring() {
                   type="range" min={0.1} max={0.95} step={0.05} value={conf}
                   onChange={e => setConf(+e.target.value)}
                   disabled={detecting}
-                  className="flex-1 accent-violet-600 disabled:opacity-40"
+                  className="flex-1 disabled:opacity-40"
                 />
-                <span className="font-mono-custom text-sm font-bold text-violet-600 w-10 text-right">{conf}</span>
+                <span className="font-mono-custom text-sm font-bold w-10 text-right" style={{ color: '#10B981' }}>{conf}</span>
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold uppercase tracking-wider mb-2" style={{ color: '#475569' }}>
                 YOLO Weights Path
               </label>
               <input
                 value={weights}
                 onChange={e => setWeights(e.target.value)}
                 disabled={detecting}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-[13px] bg-gray-50 outline-none focus:border-violet-400 disabled:opacity-40"
+                className="w-full rounded-xl px-3 py-2.5 text-[13px] outline-none transition-all disabled:opacity-40"
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.09)',
+                  color: '#E2E8F0',
+                }}
+                onFocus={e => (e.currentTarget.style.borderColor = 'rgba(16,185,129,0.4)')}
+                onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)')}
               />
             </div>
 
@@ -319,7 +356,12 @@ export default function InventoryMonitoring() {
             {detecting ? (
               <button
                 onClick={cancelDetection}
-                className="w-full py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 font-semibold text-sm flex items-center justify-center gap-2 hover:bg-red-100 transition-colors"
+                className="w-full py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors"
+                style={{
+                  background: 'rgba(239,68,68,0.1)',
+                  border: '1px solid rgba(239,68,68,0.25)',
+                  color: '#F87171'
+                }}
               >
                 <X size={15} /> Cancel Detection
               </button>
@@ -339,24 +381,43 @@ export default function InventoryMonitoring() {
 
         {/* ── SETTINGS CARD ── */}
         <Card hover>
-          <CardTitle icon={<span className="bg-amber-50">⚙️</span>}>Low-Stock Threshold</CardTitle>
-          <p className="text-[12px] text-gray-400 mb-4">
+          <CardTitle icon={<span>⚙️</span>}>Low-Stock Threshold</CardTitle>
+          <p className="text-[13px] mb-4" style={{ color: '#475569' }}>
             Products with detected counts below this threshold will be flagged for bulk restocking and competitor analysis.
           </p>
           <div className="flex items-center gap-3">
             <input
               type="range" min={10} max={150} step={5} value={threshold}
               onChange={e => setThreshold(+e.target.value)}
-              className="flex-1 accent-violet-600"
+              className="flex-1"
             />
-            <span className="font-mono-custom text-sm font-bold text-violet-600 w-12 text-right">{threshold} u</span>
+            <span className="font-mono-custom text-sm font-bold w-12 text-right" style={{ color: '#10B981' }}>{threshold} u</span>
           </div>
+
+          {/* Quick status summary */}
+          {inventory && (
+            <div className="mt-6 space-y-3">
+              <div className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#475569' }}>
+                Current Status
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                  <div className="font-mono-custom font-bold text-lg" style={{ color: '#10B981' }}>{items.length - lowCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#10B981' }}>In Stock</div>
+                </div>
+                <div className="rounded-xl p-3 text-center" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)' }}>
+                  <div className="font-mono-custom font-bold text-lg" style={{ color: '#F87171' }}>{lowCount}</div>
+                  <div className="text-[10px] font-bold uppercase tracking-wider mt-0.5" style={{ color: '#F87171' }}>Low Stock</div>
+                </div>
+              </div>
+            </div>
+          )}
         </Card>
       </div>
 
       {/* ── SHELF GRID ── */}
       <Card>
-        <CardTitle icon={<span className="bg-emerald-50">🗂️</span>}>Shelf Overview</CardTitle>
+        <CardTitle icon={<span>🗂️</span>}>Shelf Overview</CardTitle>
 
         {!inventory ? (
           <EmptyState
@@ -383,24 +444,26 @@ export default function InventoryMonitoring() {
                 const maxVal = Math.max(...items.map(([, v]) => v), 1)
                 const barPct = Math.max(6, Math.min(100, (count / maxVal) * 100))
                 const colors = {
-                  ok:       { border: 'border-emerald-300', bar: 'from-emerald-400 to-green-500', badge: 'bg-emerald-50 text-emerald-700', label: 'IN STOCK' },
-                  low:      { border: 'border-amber-300',   bar: 'from-amber-400 to-orange-400', badge: 'bg-amber-50 text-amber-700',    label: 'LOW STOCK' },
-                  critical: { border: 'border-red-400',     bar: 'from-red-400 to-rose-500',     badge: 'bg-red-50 text-red-600',       label: 'CRITICAL' },
+                  ok:       { border: 'rgba(16,185,129,0.35)',  bar: 'linear-gradient(90deg,#10B981,#059669)', badge: 'green'  as const, label: 'IN STOCK', bg: 'rgba(16,185,129,0.05)' },
+                  low:      { border: 'rgba(245,158,11,0.35)',  bar: 'linear-gradient(90deg,#F59E0B,#D97706)', badge: 'orange' as const, label: 'LOW',      bg: 'rgba(245,158,11,0.05)' },
+                  critical: { border: 'rgba(239,68,68,0.4)',    bar: 'linear-gradient(90deg,#EF4444,#DC2626)', badge: 'red'    as const, label: 'CRITICAL',  bg: 'rgba(239,68,68,0.05)'  },
                 }[cls]
 
                 return (
-                  <div key={name} className={cn('bg-white border-2 rounded-xl p-3 card-hover', colors.border)}>
-                    <div className="text-[11px] font-semibold text-gray-500 capitalize truncate mb-1.5">{name}</div>
-                    <div className="font-mono-custom text-[22px] font-bold text-gray-900 mb-2 leading-none">{count}</div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-2">
+                  <div
+                    key={name}
+                    className="rounded-xl p-3 card-hover"
+                    style={{ background: colors.bg, border: `1px solid ${colors.border}` }}
+                  >
+                    <div className="text-[11px] font-semibold capitalize truncate mb-1.5" style={{ color: '#64748B' }}>{name}</div>
+                    <div className="font-mono-custom text-[22px] font-bold mb-2 leading-none" style={{ color: '#F1F5F9' }}>{count}</div>
+                    <div className="h-1 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(255,255,255,0.06)' }}>
                       <div
-                        className={cn('h-full bg-gradient-to-r rounded-full transition-all', colors.bar)}
-                        style={{ width: `${barPct}%` }}
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${barPct}%`, background: colors.bar }}
                       />
                     </div>
-                    <span className={cn('text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full', colors.badge)}>
-                      {colors.label}
-                    </span>
+                    <Badge variant={colors.badge} className="text-[8px]">{colors.label}</Badge>
                   </div>
                 )
               })}
@@ -409,7 +472,7 @@ export default function InventoryMonitoring() {
         )}
       </Card>
 
-      {/* shimmer keyframes injected inline */}
+      {/* shimmer keyframes */}
       <style>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }

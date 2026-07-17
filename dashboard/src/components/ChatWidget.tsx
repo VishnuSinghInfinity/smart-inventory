@@ -45,32 +45,54 @@ export function ChatWidget() {
       <button
         onClick={() => setOpen(o => !o)}
         className={cn(
-          'fixed bottom-7 right-7 w-14 h-14 rounded-full z-50',
-          'bg-gradient-to-br from-violet-600 to-pink-500 text-white',
-          'shadow-[0_8px_28px_rgba(124,58,237,0.45)] hover:scale-110 transition-transform',
+          'fixed bottom-6 right-6 w-13 h-13 rounded-full z-50 flex items-center justify-center',
+          'transition-all duration-300 hover:scale-110 active:scale-95',
           !open && 'fab-float'
         )}
+        style={{
+          width: '52px',
+          height: '52px',
+          background: 'linear-gradient(135deg, #10B981, #0D9488)',
+          boxShadow: '0 8px 28px rgba(16,185,129,0.45)',
+        }}
         aria-label="Open AI chat"
       >
-        {open ? <X size={22} className="mx-auto" /> : <MessageCircle size={22} className="mx-auto" />}
+        {open ? <X size={20} className="text-white" /> : <MessageCircle size={20} className="text-white" />}
       </button>
 
       {/* Panel */}
-      <div className={cn(
-        'fixed bottom-24 right-7 w-[360px] bg-white border border-gray-200 rounded-2xl shadow-2xl z-40 flex flex-col',
-        'transition-all duration-300 origin-bottom-right',
-        open ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 pointer-events-none'
-      )} style={{ maxHeight: '520px' }}>
-
+      <div
+        className={cn(
+          'fixed bottom-[76px] right-6 flex flex-col z-40',
+          'transition-all duration-300 origin-bottom-right',
+          open ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-90 pointer-events-none'
+        )}
+        style={{
+          width: '360px',
+          maxHeight: '520px',
+          background: 'rgba(10,13,20,0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.09)',
+          borderRadius: '20px',
+          boxShadow: '0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(16,185,129,0.1)',
+        }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 flex-shrink-0">
+        <div
+          className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+        >
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center text-lg logo-glow">
-              <Zap size={16} className="text-white" />
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center logo-glow flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #10B981, #0D9488)' }}
+            >
+              <Zap size={15} className="text-white" />
             </div>
             <div>
-              <div className="font-bold text-sm text-gray-900">ShelfSense AI</div>
-              <div className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+              <div className="font-bold text-[13px]" style={{ color: '#F1F5F9' }}>ShelfSense AI</div>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: '#10B981' }}>
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 dot-pulse" />
                 Online
               </div>
@@ -78,32 +100,54 @@ export function ChatWidget() {
           </div>
           <button
             onClick={() => setOpen(false)}
-            className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+            className="w-7 h-7 rounded-lg flex items-center justify-center transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: '#6B7280'
+            }}
           >
-            <X size={14} />
+            <X size={13} />
           </button>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5">
+        <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2.5" style={{ minHeight: 0 }}>
           {messages.map((m, i) => (
             <div key={i} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
-              <div className={cn(
-                'max-w-[80%] px-3.5 py-2.5 text-[13px] leading-relaxed',
-                m.role === 'user'
-                  ? 'bg-gradient-to-br from-violet-600 to-pink-500 text-white rounded-[16px_16px_4px_16px]'
-                  : 'bg-gray-100 text-gray-800 border border-gray-200 rounded-[16px_16px_16px_4px]'
-              )}>
+              <div
+                className="max-w-[82%] px-3.5 py-2.5 text-[13px] leading-relaxed"
+                style={m.role === 'user'
+                  ? {
+                      background: 'linear-gradient(135deg, #10B981, #0D9488)',
+                      color: '#fff',
+                      borderRadius: '16px 16px 4px 16px',
+                    }
+                  : {
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#CBD5E1',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '16px 16px 16px 4px',
+                    }
+                }
+              >
                 {m.content}
               </div>
             </div>
           ))}
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-gray-100 border border-gray-200 rounded-[16px_16px_16px_4px] px-4 py-3 flex gap-1.5 items-center">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 typing-dot" />
+              <div
+                className="px-4 py-3 flex gap-1.5 items-center"
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '16px 16px 16px 4px',
+                }}
+              >
+                <div className="w-1.5 h-1.5 rounded-full typing-dot" style={{ background: '#10B981' }} />
+                <div className="w-1.5 h-1.5 rounded-full typing-dot" style={{ background: '#10B981' }} />
+                <div className="w-1.5 h-1.5 rounded-full typing-dot" style={{ background: '#10B981' }} />
               </div>
             </div>
           )}
@@ -111,20 +155,35 @@ export function ChatWidget() {
         </div>
 
         {/* Input */}
-        <div className="px-4 py-3 border-t border-gray-100 flex gap-2 flex-shrink-0">
+        <div
+          className="px-4 py-3 flex gap-2 flex-shrink-0"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+        >
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && send()}
             placeholder="Ask ShelfSense..."
-            className="flex-1 bg-gray-100 border border-gray-200 rounded-full px-4 py-2 text-[13px] outline-none focus:border-violet-400 focus:bg-white transition-colors"
+            className="flex-1 rounded-xl px-4 py-2 text-[13px] outline-none transition-all"
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.09)',
+              color: '#E2E8F0',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = 'rgba(16,185,129,0.4)')}
+            onBlur={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)')}
           />
           <button
             onClick={send}
             disabled={loading || !input.trim()}
-            className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-600 to-pink-500 flex items-center justify-center text-white disabled:opacity-40 hover:scale-110 transition-transform flex-shrink-0"
+            className="rounded-xl flex items-center justify-center text-white disabled:opacity-40 hover:opacity-90 active:scale-95 transition-all flex-shrink-0"
+            style={{
+              width: '36px',
+              height: '36px',
+              background: 'linear-gradient(135deg, #10B981, #0D9488)',
+            }}
           >
-            {loading ? <Spinner size="sm" /> : <Send size={15} />}
+            {loading ? <Spinner size="sm" /> : <Send size={14} />}
           </button>
         </div>
       </div>

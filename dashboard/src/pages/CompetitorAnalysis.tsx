@@ -93,9 +93,12 @@ export default function CompetitorAnalysis() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="font-heading font-extrabold text-[24px] tracking-tight text-gray-900">🌐 Competitor Analysis</h1>
-        <p className="text-sm text-gray-500 mt-1">
+        <h1 className="font-heading font-extrabold text-[24px] tracking-tight" style={{ color: '#F1F5F9' }}>
+          🌐 Competitor Analysis
+        </h1>
+        <p className="text-[13px] mt-1" style={{ color: '#475569' }}>
           Autonomous restock pipeline: Tavily search → Playwright scrape → Groq AI comparison.
           Finds best deals across Amazon, Flipkart, Snapdeal, and more.
         </p>
@@ -112,23 +115,48 @@ export default function CompetitorAnalysis() {
         <div className="flex items-center gap-2 px-2">
           {STAGE_LABELS.map((label, i) => (
             <div key={i} className="flex items-center gap-2 flex-1">
-              <div className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-mono-custom font-bold border-2 flex-shrink-0 transition-all duration-500',
-                i < stage ? 'bg-gradient-to-br from-emerald-400 to-green-500 border-transparent text-white'
-                : i === stage ? 'bg-gradient-to-br from-violet-600 to-pink-500 border-transparent text-white step-pulse'
-                : 'bg-gray-100 border-gray-200 text-gray-400'
-              )}>
+              <div
+                className={cn(
+                  'w-9 h-9 rounded-full flex items-center justify-center text-[13px] font-mono-custom font-bold flex-shrink-0 transition-all duration-500',
+                  i < stage
+                    ? 'step-pulse'
+                    : i === stage
+                      ? 'step-pulse'
+                      : ''
+                )}
+                style={{
+                  background: i < stage
+                    ? 'linear-gradient(135deg, #10B981, #059669)'
+                    : i === stage
+                      ? 'linear-gradient(135deg, #8B5CF6, #6D28D9)'
+                      : 'rgba(255,255,255,0.06)',
+                  border: i < stage
+                    ? '1px solid rgba(16,185,129,0.4)'
+                    : i === stage
+                      ? '1px solid rgba(139,92,246,0.4)'
+                      : '1px solid rgba(255,255,255,0.1)',
+                  color: i <= stage ? '#fff' : '#475569',
+                }}
+              >
                 {i < stage ? '✓' : i + 1}
               </div>
-              <div className={cn('text-[12px] font-semibold transition-colors',
-                i === stage ? 'text-violet-600' : i < stage ? 'text-emerald-600' : 'text-gray-400')}>
+              <div
+                className="text-[12px] font-semibold transition-colors"
+                style={{
+                  color: i === stage ? '#8B5CF6' : i < stage ? '#10B981' : '#475569'
+                }}
+              >
                 {label}
               </div>
               {i < STAGE_LABELS.length - 1 && (
-                <div className={cn(
-                  'flex-1 h-[3px] rounded-full mx-1 transition-all duration-700',
-                  i < stage ? 'bg-gradient-to-r from-emerald-400 to-violet-500' : 'bg-gray-200'
-                )} />
+                <div
+                  className="flex-1 h-[2px] rounded-full mx-1 transition-all duration-700"
+                  style={{
+                    background: i < stage
+                      ? 'linear-gradient(90deg, #10B981, #8B5CF6)'
+                      : 'rgba(255,255,255,0.06)'
+                  }}
+                />
               )}
             </div>
           ))}
@@ -137,15 +165,15 @@ export default function CompetitorAnalysis() {
 
       {/* Controls */}
       <Card hover>
-        <CardTitle icon={<span className="bg-violet-50">🤖</span>}>Restock Pipeline</CardTitle>
+        <CardTitle icon={<span>🤖</span>}>Restock Pipeline</CardTitle>
         {inventory && lowStockProducts.length > 0 && (
           <div className="mb-4">
             <Badge variant="orange" className="mb-2">⚠️ {lowStockProducts.length} low-stock products detected</Badge>
-            <p className="text-[12px] text-gray-500 mt-1 capitalize">{lowStockProducts.join(', ')}</p>
+            <p className="text-[12px] mt-1.5 capitalize" style={{ color: '#475569' }}>{lowStockProducts.join(', ')}</p>
           </div>
         )}
         {inventory && lowStockProducts.length === 0 && (
-          <p className="text-sm text-gray-500 mb-4">All products are well stocked (above {threshold} units).</p>
+          <p className="text-[13px] mb-4" style={{ color: '#475569' }}>All products are well stocked (above {threshold} units).</p>
         )}
         <Button
           variant="primary" icon={<Play size={15}/>}
@@ -160,27 +188,36 @@ export default function CompetitorAnalysis() {
       {logs.length > 0 && (
         <Card>
           <CardTitle icon={<span>🖥️</span>}>Pipeline Log</CardTitle>
-          <div className="bg-[#0F1117] rounded-xl p-4 max-h-48 overflow-y-auto font-mono-custom text-[12px] space-y-1.5">
+          <div
+            className="rounded-xl p-4 max-h-48 overflow-y-auto font-mono-custom text-[12px] space-y-1.5"
+            style={{ background: '#060910', border: '1px solid rgba(255,255,255,0.06)' }}
+          >
             {logs.map((l, i) => (
               <div key={i} className="flex gap-3">
-                <span className="text-gray-600 flex-shrink-0">{l.time}</span>
-                <span className={cn(
-                  'flex-shrink-0',
-                  l.status === 'done' || l.status === 'complete' ? 'text-emerald-400'
-                  : l.status === 'error' ? 'text-red-400'
-                  : 'text-amber-400'
-                )}>[{l.stage}]</span>
-                <span className="text-gray-300">{l.msg}</span>
+                <span style={{ color: '#374151' }} className="flex-shrink-0">{l.time}</span>
+                <span
+                  className="flex-shrink-0"
+                  style={{
+                    color: l.status === 'done' || l.status === 'complete'
+                      ? '#10B981'
+                      : l.status === 'error'
+                        ? '#F87171'
+                        : '#F59E0B'
+                  }}
+                >
+                  [{l.stage}]
+                </span>
+                <span style={{ color: '#94A3B8' }}>{l.msg}</span>
               </div>
             ))}
           </div>
         </Card>
       )}
 
-      {/* Tickets */}
+      {/* Result cards */}
       {results && results.length > 0 && (
         <Card>
-          <CardTitle icon={<span className="bg-emerald-50">🏆</span>}>
+          <CardTitle icon={<span>🏆</span>}>
             Restock Recommendations — Best Deals Found
           </CardTitle>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -188,35 +225,48 @@ export default function CompetitorAnalysis() {
               const priceVal = parsePriceValue(r['Price'] ?? '')
               const isBest = priceVal !== null && bestPerProduct[r['Product Name']] === priceVal
               return (
-                <div key={i} className={cn(
-                  'bg-white border-2 rounded-2xl p-5 relative overflow-hidden card-hover',
-                  isBest ? 'border-emerald-400 shadow-[0_0_0_2px_rgba(16,185,129,0.15),var(--shadow-md)]' : 'border-gray-200'
-                )}>
+                <div
+                  key={i}
+                  className="rounded-2xl p-5 relative overflow-hidden card-hover"
+                  style={{
+                    background: isBest ? 'rgba(16,185,129,0.06)' : 'rgba(255,255,255,0.02)',
+                    border: isBest ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(255,255,255,0.07)',
+                    boxShadow: isBest ? '0 0 24px rgba(16,185,129,0.1)' : 'none',
+                  }}
+                >
                   {isBest && (
-                    <div className="absolute top-0 right-4 bg-gradient-to-r from-emerald-500 to-green-600 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-b-lg">
+                    <div
+                      className="absolute top-0 right-4 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-b-lg"
+                      style={{ background: 'linear-gradient(135deg, #10B981, #059669)' }}
+                    >
                       🏆 Best Deal
                     </div>
                   )}
-                  <div className="font-heading font-bold text-[15px] text-gray-900 capitalize mb-0.5 mt-1">
+                  <div className="font-heading font-bold text-[15px] capitalize mb-0.5 mt-1" style={{ color: '#E2E8F0' }}>
                     {r['Product Name'] || '—'}
                   </div>
-                  <div className="text-[12px] text-gray-400 font-medium mb-4">{r['E-commerce Platform'] || '—'}</div>
-                  <hr className="border-dashed border-gray-200 mb-3" />
-                  <div className="space-y-2">
-                    {[
-                      { label: 'Price', val: r['Price'] },
-                      { label: 'Delivery', val: r['Delivery Date'] },
-                    ].map(({ label, val }) => (
-                      <div key={label} className="flex items-center justify-between text-[12px]">
-                        <span className="text-gray-400 font-medium">{label}</span>
-                        <span className="font-mono-custom font-semibold text-gray-800">{val || '—'}</span>
-                      </div>
-                    ))}
+                  <div className="text-[12px] font-medium mb-4" style={{ color: '#475569' }}>{r['E-commerce Platform'] || '—'}</div>
+                  <div className="mb-3" style={{ borderTop: '1px dashed rgba(255,255,255,0.07)', paddingTop: '12px' }}>
+                    <div className="space-y-2">
+                      {[
+                        { label: 'Price',    val: r['Price'] },
+                        { label: 'Delivery', val: r['Delivery Date'] },
+                      ].map(({ label, val }) => (
+                        <div key={label} className="flex items-center justify-between text-[12px]">
+                          <span style={{ color: '#475569' }}>{label}</span>
+                          <span className="font-mono-custom font-semibold" style={{ color: '#E2E8F0' }}>{val || '—'}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   {r['Product URL'] && (
                     <a
                       href={r['Product URL']} target="_blank" rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center gap-1.5 text-[12px] font-semibold text-white bg-gradient-to-r from-violet-600 to-pink-500 px-4 py-1.5 rounded-full hover:scale-105 transition-transform"
+                      className="mt-2 inline-flex items-center gap-1.5 text-[12px] font-semibold px-4 py-1.5 rounded-full transition-all hover:opacity-90 hover:scale-105"
+                      style={{
+                        background: 'linear-gradient(135deg, #10B981, #0D9488)',
+                        color: '#fff',
+                      }}
                     >
                       View listing →
                     </a>
@@ -228,10 +278,20 @@ export default function CompetitorAnalysis() {
 
           {rawOutput && (
             <details className="mt-5">
-              <summary className="cursor-pointer text-[13px] text-gray-500 font-semibold hover:text-gray-700">
+              <summary
+                className="cursor-pointer text-[13px] font-semibold"
+                style={{ color: '#475569' }}
+              >
                 Raw Agent Output
               </summary>
-              <pre className="mt-3 p-4 bg-gray-50 border border-gray-200 rounded-xl text-[11px] overflow-x-auto whitespace-pre-wrap font-mono-custom">
+              <pre
+                className="mt-3 p-4 rounded-xl text-[11px] overflow-x-auto whitespace-pre-wrap font-mono-custom"
+                style={{
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  color: '#94A3B8'
+                }}
+              >
                 {rawOutput}
               </pre>
             </details>

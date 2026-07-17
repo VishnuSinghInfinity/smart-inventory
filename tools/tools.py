@@ -7,6 +7,7 @@ import asyncio
 # pyrefly: ignore [missing-import]
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 # pyrefly: ignore [missing-import]
+from pathlib import Path
 from playwright.async_api import async_playwright, BrowserContext
 # pyrefly: ignore [missing-import]
 from tavily import TavilyClient, AsyncTavilyClient
@@ -15,7 +16,9 @@ from rich import print
 # pyrefly: ignore [missing-import]
 from bs4 import BeautifulSoup
 
-load_dotenv()
+# Load .env relative to the parent of this file's folder (project root)
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 async_tavily = AsyncTavilyClient(api_key=os.getenv("TAVILY_API_KEY"))

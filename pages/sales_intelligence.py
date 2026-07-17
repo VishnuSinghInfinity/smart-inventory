@@ -14,17 +14,22 @@ safe actions (regenerate recommendations, change thresholds, jump Home).
 
 import json
 import os
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
 from dotenv import load_dotenv
+
+# pyrefly: ignore [missing-import]
 from langchain_groq import ChatGroq
 
 from theme import inject_global_css, processing_banner
 from sales import load_inventory_master, generate_sales_history, compute_metrics, apply_rules
 from chatbot import ask_shelfsense, build_context
 
-load_dotenv()
+# Load .env relative to the parent directory of this folder (project root)
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 st.set_page_config(
     page_title="Sales Intelligence — ShelfSense",

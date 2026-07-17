@@ -1,18 +1,11 @@
-from langchain_groq import ChatGroq
-from dotenv import load_dotenv
-import os
-load_dotenv()
-model = ChatGroq(
-    model = "openai/gpt-oss-120b",
-    temperature = 0.7,
-    api_key = os.getenv("GROQ_API_KEY"),
-    max_tokens=3000
-)
+from pathlib import Path
 from langchain_groq import ChatGroq
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# Load .env relative to the parent of this file's folder (project root)
+env_path = Path(__file__).resolve().parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 model = ChatGroq(
     model="openai/gpt-oss-120b",

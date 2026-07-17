@@ -17,8 +17,14 @@ to send the user to the Home page for that.
 
 import json
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
+
+# Load .env relative to this file's folder (project root)
+env_path = Path(__file__).resolve().parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 VALID_ACTIONS = {"regenerate_recommendations", "set_thresholds", "navigate_home"}
 
