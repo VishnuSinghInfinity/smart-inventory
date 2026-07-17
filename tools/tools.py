@@ -8,6 +8,7 @@ import asyncio
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeoutError
 # pyrefly: ignore [missing-import]
 from pathlib import Path
+# pyrefly: ignore [missing-import]
 from playwright.async_api import async_playwright, BrowserContext
 # pyrefly: ignore [missing-import]
 from tavily import TavilyClient, AsyncTavilyClient

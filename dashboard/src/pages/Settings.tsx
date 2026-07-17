@@ -110,7 +110,7 @@ export default function Settings() {
                       style={{ background: item.color }}
                     />
                   </div>
-                  <Badge variant={item.variant}>
+                  <Badge variant={item.variant as any}>
                     {item.statusText}
                   </Badge>
                 </div>

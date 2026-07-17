@@ -20,6 +20,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# pyrefly: ignore [missing-import]
 from langchain_groq import ChatGroq
 
 # Load .env relative to this file's folder (project root)
